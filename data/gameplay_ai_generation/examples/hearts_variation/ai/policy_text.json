@@ -1,0 +1,88 @@
+{
+    "game_description": "# Hearts of Time Game System Ruleset (Refined)\n\n### 1. **Game State**\n\n#### **Common Information:**\n- **Trick History:** Sequence of played cards in each trick, visible to all players.\n- **Current Leader:** Player who won the last trick, visible to all players.\n- **Turn Information:** Current player and actions taken during the turn.\n- **Player Order:** Logical order of play, visible to all players.\n\n#### **Player-Specific Information:**\n- **Public**:\n  - **Scores:** Current interference (disturbance scores) known at all times.\n  - **Trick Wins:** Number of tricks each player has won.\n- **Private**:\n  - **Player Hand:** Cards held by the player.\n  - **Temporal Suit Shift Status:** Whether the player has used their shift ability.\n\n---\n\n### 2. **Card**\n\n#### **Attributes:**\n- **Rank:** From 2 to Ace.\n- **Suit:** One of {Hearts, Diamonds, Clubs, Spades}.\n- **Special Cards:**\n  - **Queen of Spades:** 13 points of disturbance.\n  - **Hearts:** Each incurs 1 point of disturbance.\n\n---\n\n### 3. **Deck and Initial Dealing**\n\n#### **Deck Composition:**\n- A standard 52-card deck divided into four suits.\n\n#### **Initial Dealing:**\n- **4 Players:** Each player receives 13 cards.\n- Other player counts require deck adjustment by removing low-ranking cards, maintaining suit balance.\n\n---\n\n### 4. **Legal Action Space**\n\n#### **On a Turn, a Player May:**\n1. **Lead a Trick:**\n   - Play any card from their hand.\n   - Pre-requisite: Must follow suit, unless void in that suit.\n2. **Follow a Trick:**\n   - Play a card matching the led suit, if possible.\n   - Else, play any card.\n3. **Declare Temporal Suit Shift:**\n   - Announce the shift of rule for a trick to establish a temporary trump suit. This can be declared before playing any card during a player's turn.\n   - Pre-requisite: Can only be used once per game per player.\n\n---\n\n### 5. **Round**\n\n#### **Sequence of Play:**\n1. The player with the 2 of Clubs starts the first trick.\n2. Players take turns in clockwise order, leading with the suit following rules.\n3. Each trick consists of:\n   - Playing cards in the order of player turns.\n   - Using Temporal Suit Shift if strategically advantageous. When declared, the player's chosen suit acts as trump for that entire trick.\n4. The winner of a trick leads the next trick.\n5. Play continues until all cards have been played.\n\n#### **Winning Conditions:**\n- Game ends when a player reaches a preset disturbance threshold (commonly 100 points).\n- Player with the lowest disturbance score wins.\n\n---\n\n### 6. **Other Game Mechanics & Rules**\n\n- **No Hearts or Queen of Spades First Trick:** During the first trick, players must avoid playing hearts or the Queen of Spades unless they have no alternative.\n- **Shooting the Moon:** Capturing all Hearts and Queen of Spades reduces disturbance to zero for that round, increasing opponents' scores by 26 points.\n- **Temporal Strategy:** Deciding when to use Temporal Suit Shift is critical to altering trick outcomes. The temporary trump suit impacts only one trick and reverts after its resolution.\n\n---\n\n### 7. **Player Observation Information**\n\n#### **Visible Information to Each Player:**\n- Cards in their own hand.\n- Cards played in tricks.\n- Scores of each player.\n- Temporal Suit Shift use and declared trump suit.\n\n#### **Hidden Information:**\n- Cards in opponents\u2019 hands.\n\n---\n\n### 8. **Payoffs**\n\n##### **Endgame Scoring:**\n- A point of disturbance equals 1 for each Heart.\n- Queen of Spades is worth 13 disturbance points.\n- Shooting the Moon results in zero points for the round, with opponents' scores increased.\n\n##### **Winning Player\u2019s Reward:**\n- Having the lowest disturbance score leads to victory when the game concludes.\n\nWith these refinements, the \"Hearts of Time\" game provides clarity on the use and impact of Temporal Suit Shift, maintaining the intrigue and strategy native to Hearts, while clearly outlining the new rules. Enjoy your journey through the mystical realm as you guide your temporal path among the \"Hearts of Time.\"",
+    "game_actions": "1. Lead a Trick:\n   - Play any card from their hand, following suit rules unless void in that suit.\n\n2. Follow a Trick:\n   - Play a card matching the led suit if possible. Otherwise, play any card.\n\n3. Declare Temporal Suit Shift:\n   - Announce a shift for a trick to set a temporary trump suit, usable once per game per player.",
+    "singular_strategy": "{\"name\":\"Optimal Temporal Shift Use\",\"description\":\"This strategy aims to maximize the strategic advantage gained from the Temporal Suit Shift ability by using it at a critical moment when winning the current trick can either prevent receiving disturbance points or enable the AI to 'shoot the moon'.\",\"reason\":\"Temporal Suit Shift should be treated as a powerful, one-time tool that can significantly alter the outcome of a round. An optimal moment to use the Temporal Shift is when the AI player can ensure it wins a trick containing multiple hearts or the Queen of Spades, which significantly affects the disturbance scores. By timing the use of Temporal Suit Shift effectively, the AI can force control over certain tricks, either by sticking opponents with unwanted high-point cards or by ensuring the trick is won with low-point cards, thus optimizing its endgame score.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Safe Start\",\"description\":\"Lead with low non-Heart, non-Queen of Spades when possible, to avoid capturing points in early plays.\",\"reason\":\"By avoiding high-point cards initially, an AI can prolong the safe state and observe how players discard, gaining insight into their liabilities and potential (avoidance strategies).\"},{\"name\":\"Temporal Suit Shift Timing\",\"description\":\"Efficiently use the Temporal Suit Shift when in possession of a dominant hand but in a non-dominant suit, maximizing chance to take control of the trick.\",\"reason\":\"Utilizing the Temporal Suit Shift effectively can allow the AI to convert a poor hand into a favorable one, strategically altering the current trick's dynamic to minimize incurred disturbance.\"},{\"name\":\"Shooting the Moon Strategy\",\"description\":\"Attempt to gather all Hearts and the Queen of Spades if early plays show an easy path to guarantee collecting all, thereby flipping the disturbance points.\",\"reason\":\"While risky, the opportunity to reset own disturbances to zero and adding points to opponents is beneficial. Observation of players' reluctance to play key cards can indicate the feasibility of success.\"},{\"name\":\"Controlled Disturbance\",\"description\":\"Manage a threshold of disturbance by conceding smaller value cards strategically to opponents.\",\"reason\":\"Conceding tricks strategically permits the AI to exchange low disturbance acquisition with a plan to ensure higher cards are played during turns when less critical cards are needed to win.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Hand Disturbance Potential\",\"description\":\"The total potential disturbance points in the AI player's hand, calculated by counting hearts as 1 point each and the Queen of Spades as 13 points. This metric evaluates the immediate risk associated with the cards currently held by the player.\"},{\"name\":\"Suit Control Factor\",\"description\":\"A measure of how many cards of each suit the AI player holds, indicating the player's ability to control the flow of play within a suit. This helps in deciding when to safely play or lead a particular suit without risking high disturbance points.\"},{\"name\":\"Temporal Suit Shift Opportunity\",\"description\":\"An assessment based on the current game state to determine the strategic benefit of declaring a Temporal Suit Shift. This includes considering the player's hand strength in various suits, opponents' potential cards, and the timing within the game.\"},{\"name\":\"Trick Winning Probability\",\"description\":\"The likelihood of winning the current trick based on the player's cards, the cards already played, and the dynamics of the current trick (e.g., current lead card and suit). This probability helps the AI player decide on aggressive versus defensive play styles.\"}]}",
+    "reflections": {
+        "Safe Start": "{\"name\":\"Safe Start with Contextual Adjustments\",\"reflection1\":\"The original strategy lacks specific guidance on what constitutes critical moments for playing cards. It doesn't specify conditions under which leading with certain cards is safer or more advantageous.\",\"reflection2\":\"The strategy should be conditioned on the hand disturbance potential and suit control factor through evaluating the AI player's current hand. These evaluations inform whether and when to deviate from Safe Start by leveraging card advantages or avoiding vulnerable situations.\",\"content\":\"The 'Safe Start with Contextual Adjustments' strategy advises the AI to open with low non-Heart, non-Queen of Spades cards initially. It conditions this strategy upon evaluating the 'Hand Disturbance Potential'\u2014prioritizing plays that minimize immediate risk. When deciding what card to lead, the AI should also appraise its 'Suit Control Factor', choosing suits it can control effectively or in which opponents are likely weak. The AI should only lead higher cards if it sees a viable 'Trick Winning Probability' that minimizes risk of receiving undesirable cards. Moreover, the AI should continuously assess the viability of 'Temporal Suit Shift Opportunity', ensuring that any declaration is based on tangible advantages such as strong suit presence or strategic need to redistribute card control within a trick. Through these evaluations, the AI will adapt Safe Start dynamically, avoiding critical pitfalls while exploiting opportunities.\"}",
+        "Temporal Suit Shift Timing": "{\"name\":\"Refined Temporal Suit Shift Strategy\",\"reflection1\":\"The original strategy was obscure in specifying critical moments for using the Temporal Suit Shift. Critical moments can be clarified as scenarios where the player has a high Hand Disturbance Potential but could win a trick by setting a temporary trump suit in which they have significant control (high Suit Control Factor). Additional conditions are when the Trick Winning Probability is notably low without the shift, especially in later rounds where avoiding additional disturbance becomes crucial.\",\"reflection2\":\"Conditioning the strategy on game state metrics requires evaluating the Hand Disturbance Potential, Suit Control Factor, and Trick Winning Probability. For instance, if a player holds several hearts and the Queen of Spades, the risk is high. If they also hold many spades but none have been played, a Temporal Suit Shift to spades could mitigate disturbance by winning a critical trick and offloading high-risk cards.\",\"content\":\"The refined strategy involves declaring a Temporal Suit Shift when the player has a high Hand Disturbance Potential and needs to control a trick in a non-leading suit where the player holds the majority of cards (high Suit Control Factor). Specifically, critical moments to declare the shift are when: 1) the player is likely to accumulate significant disturbance without intervention, 2) there's an opportunity to offload high disturbance cards safely using the temporary trump, and 3) the timing benefits the player by reshaping the trick dynamics to their advantage, amplifying the likelihood of taking control in pivotal or late game stages. The strategy requires careful assessment of Suit Control Factor and Trick Winning Probability for dynamic decision-making each round.\"}",
+        "Shooting the Moon Strategy": "{\"name\":\"Shooting the Moon Strategy\",\"reflection1\":\"The strategy currently mentions observing 'key cards' and opponents' reluctance to play them as an indicator of success. We need to clarify what 'key cards' are and how reluctance is assessed.\",\"reflection2\":\"The strategy should be more explicit about how it utilizes 'Hand Disturbance Potential' and 'Suit Control Factor' to decide whether pursuing Shooting the Moon is viable. For example, what is the tipping point in these metrics that makes the strategy feasible?\",\"content\":\"To refine the 'Shooting the Moon Strategy,' we identify 'key cards' as the Queen of Spades and any high Hearts cards. The strategy should assess opponents' likelihood of holding back these cards, perhaps by tracking the number of lower-ranked hearts and spades that appear as play progresses. For the AI player, a high 'Hand Disturbance Potential' at the start of the game suggests a potential for Shooting the Moon, while a high 'Suit Control Factor,' particularly in non-heart suits, implies stronger control over trick leading and following, creating opportunities to avoid leading with hearts or spades unnecessarily. Thus, the strategy should be conditioned on a combination of reaching a specific threshold in 'Hand Disturbance Potential' (e.g., having at least 8 Hearts and the Queen of Spades) and strong 'Suit Control Factor' (e.g., holding the most cards in at least two different non-hearts suits) to actively pursue Shooting the Moon. If these conditions are not met early in the game, the player should pivot to minimizing disturbance points by playing defensively and avoiding high-risk leads.\"}",
+        "Controlled Disturbance": "{\"name\":\"Refined Strategy: Controlled Disturbance\",\"reflection1\":\"The original strategy mentions 'strategically use', which needs clarification. To refine this, 'critical moments' should be defined as opportunities when the AI can allow small disturbance gains by losing a trick with minor hearts involved, while reserving higher value cards like the Queen of Spades for later strategic play or forced wins.\",\"reflection2\":\"To condition the strategy based on game state, the AI should evaluate metrics such as Hand Disturbance Potential and Trick Winning Probability. The strategy should prioritize minimizing disturbance while leveraging Suit Control Factor to manage plays that can reduce immediate disturbance risks.\",\"content\":\"The refined 'Controlled Disturbance' strategy involves conceding tricks where the total disturbance accumulation for the player will remain lower than the collective disturbance that could be forced or anticipated in upcoming plays. The AI should use the Hand Disturbance Potential metric to evaluate the amount of risk posed by cards in hand and aim to rid higher risk cards (e.g., Queen of Spades) when losing is unavoidable and does not escalate disturbance significantly. When deciding whether to contest or concede a trick, the Trick Winning Probability should guide the AI on playing aggressively or defensively, with a preference for defensive plays that result in minimal point gains by the player. The Temporal Suit Shift Opportunity metric is essential for identifying rounds where declaring a temporary trump suit could allow manipulation of trick outcomes\u2014either to offload a high-risk card or to control the flow by forcing opponents' hands. For example, if the AI holds an unfavorable number of hearts, leading with alternate suits or using a temporal shift can disrupt opponents' attempts to pool more disturbance on the AI player. Ultimately, the goal is to maintain a disturbance score below thresholds while exploiting suit control and card distribution to resume control when necessary.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                1,
+                0,
+                2
+            ],
+            "metric_history": [
+                0.3575,
+                0.405,
+                0.41
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                1,
+                0,
+                2
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3
+            ],
+            "metric_history": [
+                0.32
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3,
+                8
+            ],
+            "metric_history": [
+                0.31,
+                0.37
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                3,
+                8
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                2,
+                6
+            ],
+            "metric_history": [
+                0.31,
+                0.335
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        }
+    ]
+}

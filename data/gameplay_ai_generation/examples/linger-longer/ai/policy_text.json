@@ -1,0 +1,98 @@
+{
+    "game_description": "### The Pack\n\nThe standard 52-card pack is used.\n\n### Object of the Game\n\nThe player who lingers longer than the rest and is the last player holding cards is the winner.\n\n### The Deal\n\nEach player receives as many cards as there are players in the game. For example, if there are five players, each player gets five cards.\n\nThe dealer shuffles the cards and deals them one at a time face down to the players. The remaining cards are placed in a stack in the center of the players. This stack becomes the stock.\n\nOnce all players have their cards, the dealer takes the last card they dealt to themselves and turns it over, showing all the other players, then places it back into their hand. The card shown is the trump suit for the game.\n\n### The Play\n\nThe player directly to the left of the dealer goes first, putting any card in the trump suit in the middle of the table. If a trump card cannot be played, the player can play any card in his hand.\n\nThe next player goes by playing the suit or a trump card. You are trying to win the trick, so play the highest ranking card possible.\n\nPlay continues to the left until every player has played their card.\n\nWhichever player played the highest card or highest trump card, if a trump card was played, wins the trick. The cards from the finished trick are placed to the side and the winner of the trick takes the top card from the stock adding it to their hand. The winner then plays the first card starting the next trick.\n\nIf at any time during the game a player runs out of cards, they immediately withdraw from the game",
+    "game_actions": "1. Play any card in the trump suit if available; if not, play any card from their hand.\n2. Attempt to play the highest ranking card possible to win the trick.\n3. If winning the trick, draw the top card from the stock to add to their hand.",
+    "singular_strategy": "{\"name\":\"Optimal Card Play Strategy\",\"description\":\"This strategy focuses on playing the highest possible card in the trump suit to increase the chances of winning each trick. If no trump card is available, play the highest non-trump card. Remember which high cards have already been played through the game history and adjust tactics accordingly, to avoid playing a high card when it's less likely to win.\",\"reason\":\"Winning tricks is crucial as it allows the player to draw additional cards from the stock, thereby maintaining a larger hand. By consistently playing the highest card in the trump suit and later other high-value cards, the player maximizes their chances of winning tricks. Tracking the history of played cards helps optimize future plays, thereby increasing the odds of being the last player with cards. This strategic approach balances aggression with foresight, considering both immediate trick-winning potential and long-term hand sustainability.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Maximize Trump Usage\",\"description\":\"Always prioritize playing trump cards whenever possible to ensure winning the trick, even if it means playing a lower-ranked trump card.\",\"reason\":\"The trump suit is the most powerful tool in this game, as it overrides all other suits. By using trump cards strategically, you can ensure winning key tricks that allow you to draw from the stock and maintain a card advantage over your opponents.\"},{\"name\":\"Track Opponent Behavior\",\"description\":\"Pay attention to the cards played by opponents, particularly the suits they avoid, which can indicate which suits they lack or are low in.\",\"reason\":\"Understanding the distribution of suits among opponents helps in predicting future plays, allowing for smarter card usage and reducing the chance of losing key tricks.\"},{\"name\":\"Conserve High Cards\",\"description\":\"Hold onto high-ranking cards within non-trump suits for as long as possible, using them strategically when opponents have already played lower cards of the same suit.\",\"reason\":\"By conserving high cards, the player is better prepared for turns when a trump card cannot be played, increasing the likelihood of winning such rounds.\"},{\"name\":\"Optimize Stock Drawing\",\"description\":\"When winning a trick, prioritize drawing cards strategically from the stock to refresh your hand with higher-ranked or trump cards if possible.\",\"reason\":\"The ability to maintain or increase the strength of your hand is vital to staying in the game longer. Drawing cards that can improve your hand's overall ranking ensures sustained competitiveness throughout the game.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Trump Suit Card Ratio\",\"description\":\"The ratio of cards in the trump suit to the total number of cards in the player's hand. This metric evaluates how strong a player's hand is in terms of potential to win tricks, as trump cards are more likely to win.\"},{\"name\":\"Trick Winning Probability\",\"description\":\"An estimation of the likelihood of winning the current trick, based on the cards played so far, the known trump card, and the strength of the cards remaining in the player's hand. This helps in deciding which card to play for maximizing the chance of winning the trick.\"},{\"name\":\"Stock Size Impact\",\"description\":\"A metric indicating how the size of the stock affects strategy. With a larger stock, the importance of drawing high-value cards increases, while with a depleted stock, conserving strong cards in hand may become more beneficial.\"},{\"name\":\"Opponent Card Uncertainty\",\"description\":\"A measure of uncertainty regarding the remaining cards in the opponents' hands, based on the historical play. It helps in assessing risk when deciding whether to play aggressively or conservatively in the given state of play.\"}]}",
+    "reflections": {
+        "Maximize Trump Usage": "{\"name\":\"Refined Maximize Trump Usage Strategy\",\"reflection1\":\"The original strategy mentions using trump cards strategically but doesn't specify when it's most critical to do so. Clarifying these moments can enhance decision-making.\",\"reflection2\":\"The strategy should consider various game state metrics to dynamically adjust which cards to play. This includes evaluating the hand's trump suit card ratio and estimating the trick-winning probability.\",\"content\":\"This refined strategy prioritizes the use of trump cards under specific conditions for better clarity and efficiency. It defines 'critical moments' as scenarios when (1) the current trick's successful completion increases the player's card count significantly based on a high trick-winning probability or (2) the player's Trump Suit Card Ratio compared to the total cards is significantly high, indicating a strong chance of winning. The strategy also considers Stock Size Impact - if the stock is large, use trump cards to win tricks and draw more cards. Conversely, if the stock is depleting, conserve trump cards for assurance of winning critical remaining tricks. Opponent Card Uncertainty is accounted for by testing aggressive trump plays when opponent hands are presumed weak.\"}",
+        "Track Opponent Behavior": "{\"name\":\"Track Opponent Behavior\",\"reflection1\":\"The strategy suggests observing opponents' behavior, but lacks detail on what specific patterns or actions to watch for. To clarify, the AI should look for instances when opponents choose not to play certain suits, which can be crucial in understanding what suits they either lack entirely or possess in limited quantity.\",\"reflection2\":\"This strategy is implicitly conditioned on the 'Opponent Card Uncertainty' metric. As more rounds are played and more cards are revealed, uncertainty about the opponents' cards decreases, allowing the AI to make more informed decisions. If the AI notices an opponent consistently avoiding a suit or playing low cards of a suit, it can infer information about the opponent's hand.\",\"content\":\"To refine the strategy, the AI should dynamically adjust its play based on observed patterns in opponents' card choices. Specifically, if an opponent repeatedly avoids playing a particular suit, the AI can deduce that this opponent has few or none of those cards and adjust its risk-taking with its own cards accordingly. Additionally, the AI can prioritize playing higher-ranking cards in suits the opponent likely lacks to attempt to win tricks more confidently. This approach leverages the 'Opponent Card Uncertainty' metric by gradually reducing uncertainty through accumulated observations, thus optimizing card play in subsequent turns.\"}",
+        "Conserve High Cards": "{\"name\":\"Conserve High Cards\",\"reflection1\":\"The original strategy mentions 'using them strategically' without specifying critical moments. Clarify when to deploy high-ranking non-trump cards effectively.\",\"reflection2\":\"Condition the strategy based on 'Trick Winning Probability'. Determine when to hold or deploy high non-trump cards based on calculated chances of winning specific tricks.\",\"content\":\"To refine 'Conserve High Cards,' the player should focus on the critical moments where opponents have already played lower cards of the same suit or when the probability of opponents holding trump cards is low. A critical moment to play such high cards is when the 'Trick Winning Probability' suggests a high chance of securing the trick by playing the high non-trump card. This moment typically occurs when the majority of players have exhausted their stronger cards in the current suit. Additionally, 'Stock Size Impact' should be considered. If the stock is low, prioritize conserving trumps and high ranks to maintain competitive hand strength for later rounds.\"}",
+        "Optimize Stock Drawing": "{\"name\":\"Refined Strategy for Optimizing Stock Drawing\",\"reflection1\":\"The initial strategy mentions drawing cards strategically from the stock but doesn't specify what 'strategically' means. To clarify, strategic drawing could mean focusing on increasing the 'Trump Suit Card Ratio' significantly above others, or if not possible, improving the overall 'Trick Winning Probability' by choosing cards that cater to non-trump suits in demand based on the game state tactics.\",\"reflection2\":\"The strategy should be conditioned on game state metrics to truly optimize card drawing. For example, the 'Stock Size Impact' should guide decisions on whether to pursue high-value cards aggressively when the stock is large or conserve resources when it is almost depleted. Moreover, monitoring 'Opponent Card Uncertainty' helps assess risk levels for balancing between aggressive or conservative tactics.\",\"content\":\"To optimize stock drawing effectively: (1) Prioritize acquiring trump suit cards from the stock when the 'Trump Suit Card Ratio' in your hand is below that of other suits or the stock is large enough to justify aggressive drawing. (2) If the trump ratio is already strong, focus on maximizing 'Trick Winning Probability' by drawing high-valued cards in non-trump suits that are underrepresented in your current hand. (3) Consider 'Stock Size Impact' and adjust drawing strategies: focus on aggressive drawing for quality when stock size is ample, and conserve powerful plays when stock is nearly depleted. (4) Evaluate 'Opponent Card Uncertainty' after every round to dynamically adjust the aggression or conservatism of your strategy based on opponents' potential plays.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                10,
+                5,
+                7,
+                3
+            ],
+            "metric_history": [
+                0.24,
+                0.2575,
+                0.325,
+                0.355
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                10,
+                7,
+                3
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                4,
+                6
+            ],
+            "metric_history": [
+                0.235,
+                0.3275
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                4
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                10
+            ],
+            "metric_history": [
+                0.2075,
+                0.23
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                7
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                0,
+                1,
+                5
+            ],
+            "metric_history": [
+                0.17,
+                0.205,
+                0.2125
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                1,
+                5
+            ]
+        }
+    ]
+}

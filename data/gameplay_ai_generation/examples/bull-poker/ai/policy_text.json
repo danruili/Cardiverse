@@ -1,0 +1,88 @@
+{
+    "game_description": "### The Pack\n\nThe standard 52-card pack is used.\n\n### Object of the Game\n\nThe goal of each player is to win the pot, which contains all the bets that the players have made in any one deal. A player makes a bet in hopes that they have the best hand, or to give the impression that they do. In most Poker versions, the top combination of five cards is the best hand.\n\n### The Deal\n\nFor this version of High Low Poker, each player receives three cards face down. Players arrange them in any order desired, but may not thereafter change the order.\n\n### The Play\n\nThere is a betting interval. Then each player receives four face-up cards, one at a time, with a betting interval after each. Next, each player turns up their first facedown card, followed by a betting interval, and then their second face-down card, followed by the final betting interval. The last card is then turned up for the showdown.\n\n### Poker Hands\n\nFive of a Kind - This is the highest possible hand and can occur only where at least one card is wild, such as a joker. Examples of five of a kind would be four 10s and a wild card or two queens and three wild cards.\n\nStraight Flush - This is the highest possible hand when only the standard pack is used, and there are no wild cards. A straight flush consists of five cards of the same suit in sequence, such as 10, 9, 8, 7, 6 of hearts.\n\nFour of a Kind - This is the next highest hand. An example is four aces or four 3s.\n\nFull House - This colorful hand is made up of three cards of one rank and two cards of another rank, such as three 8s and two 4s.\n\nFlush - Five cards all of the same suit, but not all in sequence, is a flush. An example is Q, 10, 7, 6, and 2 of clubs.\n\nStraight - Five cards in sequence, but not all of the same suit is a straight. An example is 9\u2665, 8\u2663, 7\u2660, 6\u2666, 5\u2665.\n\nThree of a Kind - This combination contains three cards of the same rank, and the other two cards each of a different rank, such as three jacks, a seven, and a four.\n\nTwo Pairs - This hand contains a pair of one rank and another pair of a different rank, plus any fifth card of a different rank, such as Q, Q, 7, 7, 4.\n\nOne Pair - This frequent combination contains just one pair with the other three cards being of different rank. An example is 10, 10, K, 4, 3.\n\nNo Pair - This very common hand contains \"nothing.\" None of the five cards pair up, nor are all five cards of the same suit or consecutive in rank. When more than one player has no pair, the hands are rated by the highest card each hand contains, so that an ace-high hand beats a king-high hand, and so on.",
+    "game_actions": "1. Participate in the betting interval after receiving each of the four face-up cards.\n2. Arrange the initial three face-down cards in any order, keeping in mind they may not be rearranged later.\n3. Turn up the first face-down card, and then participate in the subsequent betting interval.\n4. Turn up the second face-down card, followed by another betting interval.\n5. Participate in the final betting interval after revealing all face-down cards.\n6. Show your cards in the showdown and compare hands to determine the winner of the pot.",
+    "singular_strategy": "{\"name\":\"Optimized Card Arrangement and Adaptive Betting\",\"description\":\"The AI prioritizes arranging the three dealt face-down cards in an order that maximizes potential future betting leverage, based on probabilities and the cards' ranks. During betting intervals, the AI uses adaptive betting strategies influenced by community cards, historical gameplay, bluffing potential, and pot odds to optimize decision-making.\",\"reason\":\"Arranging the face-down cards strategically allows the AI to control the reveal of key cards at crucial intervals, maximizing leverage. By leveraging historical data and current game state (including community cards), the AI can make more informed betting decisions. This strategy enhances the likelihood of forming superior poker hands while tactically bluffing when appropriate. Optimizing betting intervals increases pot control and strategic manipulation of other players, leading to higher chances of winning.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Optimal Face-Down Card Arrangement\",\"description\":\"When receiving the three face-down cards, arrange them with the weakest card first, strongest second, and the intermediate card last.\",\"reason\":\"Revealing the weakest card first can potentially mislead opponents about the true strength of your hand, delaying their confidence and betting. Revealing the strongest card last maintains suspense and keeps your hand's potential hidden until the final reveals, potentially influencing betting behavior in earlier rounds.\"},{\"name\":\"Aggressive Betting with Strong Hands\",\"description\":\"Engage in aggressive betting when your revealed cards already indicate a high possibility of a strong poker hand (e.g., multiple cards of the same rank or suited sequence).\",\"reason\":\"Committing to aggressive bets early on not only builds the pot but also pressures other players with weaker hands to fold, reducing competition during the showdown. It leverages the visible strength of your hand to increase potential winnings.\"},{\"name\":\"Bluff in Early Betting Intervals\",\"description\":\"When your face-up cards don't form an obvious strong hand, consider bluffing by participating in higher bets.\",\"reason\":\"Bluffing early can create an image of confidence and strength, causing opponents to second-guess the actual strength of their hands. This psychological strategy can push opponents with marginal hands to fold, narrowing down the competition.\"},{\"name\":\"Calculative Risk Assessment\",\"description\":\"Regularly assess the revealed cards and betting behaviors of opponents to adapt your strategies mid-game.\",\"reason\":\"By keeping track of the face-up cards across the table and noting betting patterns, the AI can better estimate the types of possible hands others might be forming. This helps in making informed decisions on whether to continue betting, fold, or increase bets, optimizing risk versus reward as the game progresses.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Hand Strength Metric\",\"description\":\"Evaluates the current strength of the AI's hand using standard poker hand rankings. This metric helps decide whether to bet strongly, bet lightly, or fold based on the likelihood of winning the pot given the current visible cards and possible opponent hands.\"},{\"name\":\"Pot Odds Ratio\",\"description\":\"Calculates the ratio of the current pot size to the bet required to continue playing. This metric aids the AI in making betting decisions by comparing the potential reward of winning the pot against the cost of the next bet, encouraging mathematically sound play.\"},{\"name\":\"Opponent Betting Behavior Metric\",\"description\":\"Analyzes opponents' betting patterns observed during the game to assess their likely hand strength. This metric is used to adjust the AI's own betting strategy, possibly bluffing when opponents seem weak or playing cautiously when strong hands are indicated.\"},{\"name\":\"Card Improvement Potential\",\"description\":\"Assesses the capability of improving the AI's current hand with future card reveals. Factors considered include the number of cards left to be revealed, possible straights, flushes, or other hands that could be completed, influencing whether the AI commits more chips in the current betting round.\"}]}",
+    "reflections": {
+        "Optimal Face-Down Card Arrangement": "{\"name\":\"Refined Optimal Face-Down Card Arrangement Strategy\",\"reflection1\":\"The initial strategy is somewhat unclear about what qualifies as the 'strongest' and 'weakest' card. It should be specified as the card's potential contribution to a strong poker hand, taking into account both inherent card rank and possible combinations with existing and future face-up cards.\",\"reflection2\":\"The strategy can use various game state metrics to condition decisions about card arrangement. Specifically, the Hand Strength Metric and Card Improvement Potential are crucial in deciding both the order of cards and the confidence in betting. For instance, if the hand strength is already high, the emphasis can be on potential rather than current value.\",\"content\":\"Refine the strategy to use visible game state metrics: When arranging the initial three face-down cards, evaluate their current and potential contribution to strong poker hands using the Hand Strength Metric. Begin by sorting these cards based on potential combinations with the communal face-up cards and taking the Card Improvement Potential into account. Place the card with the lowest immediate contribution first, the highest potential for unsettling opponents second, and the card possibly maximizing the hand's value last. If confronted with a tie on metrics, consider opponent tendencies, modeled by the Opponent Betting Behavior Metric, to decide arrangements that maximize psychological impact. Throughout each betting interval triggered by facing any down card, also consider the Pot Odds Ratio to decide if increasing the pot with aggressive betting aligns with the assessed hand potential and risk tolerance.\"}",
+        "Aggressive Betting with Strong Hands": "{\"name\":\"Aggressive Betting with Strong Hands\",\"reflection1\":\"The strategy specifies engaging in aggressive betting when there is a high possibility of a strong hand, but does not define 'high possibility' explicitly. To clarify, this threshold could be set to when the AI's hand ranks in the top third of possible hand outcomes given the community cards, as determined by the 'Hand Strength Metric'. Critical moments could be defined as points when the AI receives cards that substantially increase hand strength, such as achieving a pair or flush draw.\",\"reflection2\":\"The strategy is conditioned on both the 'Hand Strength Metric' and 'Opponent Betting Behavior Metric'. The AI should assess its hand strength and compare it against the opponent\u2019s betting patterns. If the hand strength score indicates a strong potential hand (for example, a potential flush or straight with open-ended cards), aggressive betting is warranted. Additionally, if opponents have been conservative in their bets, it may signal they have weaker hands, making aggressive betting more effective.\",\"content\":\"The strategy 'Aggressive Betting with Strong Hands' can be refined by leveraging specific metrics and defining key moments of execution. The AI should engage in aggressive betting when the 'Hand Strength Metric' indicates a top-third ranking of hand strength within possible outcomes given the visible cards. Moments to initiate aggressive betting can include receiving a card that completes a strong hand or establishes a significant draw (e.g., four cards to a flush). Additionally, the 'Opponent Betting Behavior Metric' should be used to gauge opponents' perceived confidence. If opponents are betting weakly or folding often, indicating weaker hands, the AI can use this as an opportunity to increase aggression. Balancing these metrics ensures that the aggressive strategy is applied judiciously and positionally, optimizing for maximum pot growth while minimizing unnecessary risk.\"}",
+        "Bluff in Early Betting Intervals": "{\"name\":\"Bluff in Early Betting Intervals\",\"reflection1\":\"The original strategy mentions 'bluffing by participating in higher bets,' which could be considered obscure because it doesn't specify the criteria for deciding when bluffing is appropriate. Is it always beneficial to bluff in the early betting intervals, or should certain conditions be met?\",\"reflection2\":\"The strategy should be conditioned on the state metrics like the Hand Strength Metric, Pot Odds Ratio, and Opponent Betting Behavior Metric. Bluffing decisions should take into account these metrics to determine if the potential benefits justify the risks.\",\"content\":\"The strategy to bluff in early betting intervals can be refined by incorporating specific conditions based on game state metrics. Specifically, bluffing should primarily occur when the AI's Hand Strength Metric indicates a weak or mediocre hand. However, bluffing should also consider the Opponent Betting Behavior Metric, bluffing more aggressively if opponents have shown caution or weakness in their betting. Meanwhile, the Pot Odds Ratio should also be considered to ensure that the potential reward of winning the pot is worth the bluff investment. If the pot odds are favorable and the opponent behavior seems passive, the AI is in a strong position to bluff confidently, creating an image of strength and potentially driving opponents to fold their marginal hands.\"}",
+        "Calculative Risk Assessment": "{\"name\":\"Calculative Risk Assessment\",\"reflection1\":\"The strategy 'Calculative Risk Assessment' mentions using face-up cards and betting behaviors to adapt strategies; however, it does not detail what constitutes 'critical moments' for adaptation. Critical moments can be defined as situations where a significant change in board texture occurs, when an opponent makes an unusually large or small bet compared to previous rounds, or when the pot odds and hand strength metrics indicate a strategic deviation is necessary.\",\"reflection2\":\"The strategy should be conditioned explicitly on specific game state metrics. For instance, 'Hand Strength Metric' can be used to determine the AI's hand quality against revealed community cards. 'Pot Odds Ratio' helps decide whether the bet is worth the risk. 'Opponent Betting Behavior Metric' provides an understanding of opponents' potential hands, guiding the AI's decision to bluff or stay conservative based on observed patterns. 'Card Improvement Potential' assesses future rounds' opportunity for enhancing the hand, guiding the decision to continue investing in the pot.\",\"content\":\"The 'Calculative Risk Assessment' strategy should leverage game state metrics to determine betting actions. The AI should consistently evaluate its 'Hand Strength Metric' at each betting interval, adjusting its betting level based on perceived strength. It should use 'Pot Odds Ratio' to ensure mathematically sound bets, only investing in situations with favorable returns. The 'Opponent Betting Behavior Metric' must be employed to gauge opponents' potential hands, helping decide on aggressive or cautious play. The AI should consider 'Card Improvement Potential' by anticipating the impact of future card reveals to decide whether to fold, call, or raise, aiming for positive expected value increases. By clearly defining these metrics and scenarios, the strategy can be executed with precision, optimizing decision-making dynamically throughout the game.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                8
+            ],
+            "metric_history": [
+                0.69
+            ],
+            "label": "ours",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                4,
+                2,
+                7,
+                6
+            ],
+            "metric_history": [
+                0.66,
+                0.67,
+                0.73,
+                0.76
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                2,
+                6
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                10,
+                4
+            ],
+            "metric_history": [
+                0.28,
+                0.3
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                10
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                2,
+                6
+            ],
+            "metric_history": [
+                0.25,
+                0.2675
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        }
+    ]
+}

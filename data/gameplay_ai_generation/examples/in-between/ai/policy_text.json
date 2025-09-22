@@ -1,0 +1,92 @@
+{
+    "game_description": "In-Between is not very popular at casinos, but is often played in home Poker games as a break from Poker itself. The rules below are for the home game, which is easily adaptable for casino play.\n\n### Rank of Cards\n\nA (high), K, Q, J, 10, 9, 8, 7, 6, 5, 4, 3, 2.\n\n### Object of the Game\n\nThe goal is to be the player with the most chips at the end of the game.\n\n### The Ante\n\nChips are distributed to the players, and each players puts one chip in the center of the table to form a pool or pot.\n\n### The Draw\n\nAny player deals one card face up, to each player in turn, and the player with the highest card deals first.\n\n### The Shuffle, Cut, and Deal\n\nAny player may shuffle, and the dealer shuffles last. The player to the dealer's right cuts the cards. The dealer turns up two cards and places them in the middle of the table, positioning them so that there is ample room for a third card to fit in between.\n\n### The Betting\n\nThe player on the dealer's left may bet up to the entire pot or any portion of the number of chips in the pot, but they must always bet a minimum of one chip. When the player has placed a bet, the dealer turns up the top card from the pack and places it between the two cards already face up. If the card ranks between the two cards already face up, the player wins and takes back the amount of his bet plus an equivalent amount from the pot. If the third card is not between the face-up cards, or is of the same rank as either of them, the player loses his bet, and it is added to the pot. If the two face-up cards up are consecutive, the player automatically loses, and a third card need not be turned up. If the two face-up cards are the same, the player wins two chips and, again, no third card is turned up. (In some games, the player is paid three chips when this occurs.)\n\n\"Acey-Deucey\" (ace, 2) is the best combination, and a player tends to bet the whole pot, if they can. This is because the only way an ace-deuce combination can lose is if the third card turned up is also an ace or a deuce.\n\nAfter the first player has finished, the dealer clears away the cards and places them face down in a pile. The next player then places a bet, and the dealer repeats the same procedure until all the players, including the dealer, have had a turn.\n\nIf at any time, the pot has no more chips in it (because a player has \"bet the pot\" and won), each player again puts in one chip to restore\u00a0the pot.\n\nWhen every player has had a turn to bet, the deal passes to the player on the dealer's left, and the game continues.",
+    "game_actions": "1. Determine the dealer by having each player draw one card face up, with the highest card becoming the dealer.\n2. The dealer shuffles the cards, the player to the dealer's right cuts the deck, and the dealer deals two cards face up in the middle of the table.\n3. Place a bet up to the total number of chips in the pot, with a minimum bet of one chip.\n4. Observe the dealer draw a third card to place between the two face-up cards:\n   - If the third card is ranked between the two face-up cards, win and take back the bet plus the equivalent amount from the pot.\n   - If the third card matches the rank of one of the two face-up cards, or is not in between, lose the bet.\n   - Automatically lose if the two face-up cards are consecutive.\n   - Win two or three chips if the two face-up cards are the same, without a third card being drawn.\n5. Decide whether to bet the whole pot when the face-up cards are an Ace and a Deuce.\n6. If the pot is empty due to a winning bet, contribute one chip along with other players to restore the pot.",
+    "singular_strategy": "{\"name\":\"Strategic Bet Evaluation\",\"description\":\"The AI evaluates the potential range between two face-up cards and determines the bet based on the probability of the third card landing between them. If the range between the cards is large, the AI will bet closer to the whole pot, as the chances of winning are higher. This decision is adjusted for cards that decrease the winning range like high neighboring pairs (e.g., King-Queen). On seeing an Ace and a Deuce, the AI will bet the entire pot, leveraging the minimal risk involved.\",\"reason\":\"This strategy maximizes potential gains by understanding the statistical odds of a third card fitting within the range of the two cards on the table. By quantifying risks versus rewards, especially in advantageous scenarios like Ace-Deuce, the AI can optimize its bets to accumulate the maximum chips over time. Accounting for potential risk by evaluating the card positions (such as sequential or identical pairs) ensures the AI makes decisions that protect its chip count while optimizing for large wins.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Bet High on Wide Range\",\"description\":\"When the two face-up cards have a wide range between them, such as a 2 and a King, place a high bet close to the pot size.\",\"reason\":\"A wide range increases the probability that the third card will fall between the two cards, making it advantageous to place a larger bet to capitalize on this situation.\"},{\"name\":\"Minimum Bet on Consecutive Cards\",\"description\":\"When the two face-up cards are consecutive (e.g., a 7 and an 8), bet the minimum amount required.\",\"reason\":\"Consecutive cards guarantee a loss as no card can fall between them. Betting the minimum limits potential losses.\"},{\"name\":\"Bet Pot on Acey-Deucey\",\"description\":\"When the two face-up cards are an Ace and a Deuce, always bet the entire pot.\",\"reason\":\"Acey-Deucey is the best combination, with only losing to another Ace or Deuce. This rare but strong hand warrants a maximum bet to optimize potential winnings.\"},{\"name\":\"Moderate Betting on Equal Cards\",\"description\":\"If the two face-up cards are of the same rank, place a moderate bet, not exceeding half the pot.\",\"reason\":\"Equal-ranked cards automatically win two or three chips without drawing a third card. A moderate bet ensures capturing this benefit while retaining chips for riskier situations.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Betting Range Potential\",\"description\":\"Calculates the likelihood of the third card landing between the two face-up cards. It considers the number of ranks between the two cards and assigns a higher value for more potential outcomes that benefit the player, affecting the betting decision.\"},{\"name\":\"Pot Odds Ratio\",\"description\":\"Assesses the ratio of the current betting opportunity relative to the size of the pot. A higher pot relative to possible winning potential encourages riskier bets, and this metric influences whether to bet conservatively or aggressively.\"},{\"name\":\"Face Card Pair Status\",\"description\":\"Checks if the two face-up cards form a special pair (such as Acey-Deucey or consecutive cards). Pair status drastically changes the risk and reward dynamic and determines special betting strategies like betting the whole pot on Acey-Deucey.\"},{\"name\":\"Current Chip Advantage\",\"description\":\"Measures the AI's current chip lead or disadvantage compared to other players. This encourages strategic adjustments: more aggressive bets when leading to capitalize on advantage, or conservative plays when trailing to avoid elimination.\"}]}",
+    "reflections": {
+        "Bet High on Wide Range": "{\"name\":\"Refined Wide Range Betting Strategy\",\"reflection1\":\"The original strategy refers to a 'wide range' but doesn't specify how wide it should be. This lack of specificity requires clarification.\",\"reflection2\":\"The strategy could be improved by conditioning it on the game state metrics such as 'Betting Range Potential' and 'Pot Odds Ratio' to determine when to bet high strategically.\",\"content\":\"The 'Wide Range' condition should be clarified as having at least four card ranks between the two face-up cards (e.g., a 2 and a 6, or a Jack and an Ace). A high bet should be placed when 'Betting Range Potential' is high, meaning there are many ranks between the two face-up cards. Additionally, before placing a high bet, assess the 'Pot Odds Ratio' to ensure that the potential reward justifies the risk. If the ratio is favorable and the AI has a 'Current Chip Advantage,' an aggressive bet close to the pot size is recommended. A 'Face Card Pair Status' of Acey-Deucey overrides other factors, prompting a bet of the whole pot due to the low risk of loss.\"}",
+        "Minimum Bet on Consecutive Cards": "{\"name\":\"Minimum Bet on Consecutive Cards\",\"reflection1\":\"The strategy of making a minimum bet when faced with consecutive cards is clear and explicitly defined. It avoids vague language, effectively communicating the rationale that no card can justify a higher bet in this scenario.\",\"reflection2\":\"The strategy can be conditioned based on the 'Face Card Pair Status.' Automatic loss is guaranteed with consecutive cards, hence the rationale to minimize losses by betting the minimum. This decision aligns with the game state metric by recognizing the absence of any beneficial outcomes.\",\"content\":\"When the two face-up cards are consecutive (e.g., a 7 and an 8), the player should bet the minimum amount required. This approach conditions on realizing the 'Face Card Pair Status,' acknowledging that consecutive cards guarantee a loss because no possible card can fall between them. Therefore, betting the minimum effectively curtails potential losses arising from this situation.\"}",
+        "Bet Pot on Acey-Deucey": "{\"name\":\"Bet Pot on Acey-Deucey with Strategic Considerations\",\"reflection1\":\"The strategy is well-defined for Acey-Deucey situations, but it does not account for other critical moments or scenarios. Clarification is needed about when to bet in situations that deviate from this combo, such as consecutives or pairs.\",\"reflection2\":\"The current AI strategy focuses solely on the occurrence of Acey-Deucey without taking into account other metrics like Betting Range Potential or Pot Odds Ratio. Conditioning the strategy on these metrics could enhance decision-making.\",\"content\":\"Refined Strategy: Always bet the entire pot when the face-up cards are an Ace and a Deuce, due to the exceptionally low likelihood of losing this bet. In addition, evaluate the Betting Range Potential of non-Acey-Deucey hands to assess the likelihood of the third card falling within the range. Calculate the Pot Odds Ratio to decide if the bet aligns with the potential reward\u2014considering larger bets when the pot is significantly large in comparison to the bet size. Factor in the Current Chip Advantage; with a higher chip advantage, consider riskier bets, whereas a low advantage warrants more conservative plays. These metrics will help optimize decisions beyond just the Acey-Deucey scenario.\"}",
+        "Moderate Betting on Equal Cards": "{\"name\":\"Refined Moderate Betting on Equal Cards\",\"reflection1\":\"The original strategy suggests placing a moderate bet when the face-up cards are of the same rank. This implies betting to capture the automatic win benefit without overcommitting. However, the term 'moderate' is vague and needs a definition in terms of gameplay situation.\",\"reflection2\":\"Conditioning the strategy on game state metrics can provide clarity. The strategy should consider factors like the 'Current Chip Advantage' and 'Pot Odds Ratio' to determine what constitutes a moderate bet in different scenarios.\",\"content\":\"The strategy suggests placing a bet not exceeding half the pot when the face-up cards are of equal rank. This move capitalizes on the certain win (gaining two or three chips) without risking excessive loss. To refine the strategy, the bet size should dynamically adjust based on two game state metrics: (1) 'Current Chip Advantage': If the AI is leading, it may safely bet up to half the pot; if trailing, it might be more conservative, reducing the bet to a quarter of the pot to minimize risk while ensuring some gain. (2) 'Pot Odds Ratio': If the pot is large compared to typical rounds, it slightly increases the bet within the 'half the pot' range, capturing potential gains without heavy risk. These adjustments ensure the strategy remains effective across various game conditions.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3,
+                6,
+                4
+            ],
+            "metric_history": [
+                0.4275,
+                0.45,
+                0.49
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                6,
+                4
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                3,
+                4,
+                6
+            ],
+            "metric_history": [
+                0.385,
+                0.435,
+                0.44,
+                0.485
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                4
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3,
+                5,
+                7
+            ],
+            "metric_history": [
+                0.2825,
+                0.3725,
+                0.415
+            ],
+            "label": "ours",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5
+            ],
+            "metric_history": [
+                0.17
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        }
+    ]
+}

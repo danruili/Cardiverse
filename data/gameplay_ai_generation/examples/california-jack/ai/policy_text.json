@@ -1,0 +1,85 @@
+{
+    "game_description": "Rank of Cards\n\nA (high), K, Q, J, 10, 9, 8, 7, 6, 5, 4, 3, 2.\n\nDeal cards either one or three at a time, beginning with the opponent, until each player has six cards. The remaining cards are squared and turned face up in the center of the table, serving as a stock. The top card is the trump suit for that deal.\n\n### The Play\n\nThe player on the dealer's left leads. The card led loses the trick to a higher card of the same suit or to a trump, but wins the trick otherwise. The winner of each trick leads next. The second player to each trick must either follow suit or trump, if possible. If unable to follow suit or trump, they may play any card.\n\nThe winner of each trick draws the top card of the stock, and the loser takes the next card. Since the top card of the stock is always exposed, an object of play frequently is to win or lose a trick depending on whether the player wishes to draw the top card of the stock or take a chance on what the next card will be. When the stock is exhausted, the last six cards of each player's hand are played out until all cards have been played.\n\n### How to Keep Score\n\nOne point each is scored for taking the tricks that contain: High (ace of trumps), Low (deuce of trumps), Jack of trumps, and Game (the greatest number of points in counting cards, each ten counting 10 points, each ace 4, each king 3, each queen 2, each jack 1).\n\nThe first player to score 10 points wins the game. If both players reach 10 in the same hand, the points count in order: High, Low, Jack, Game.",
+    "game_actions": "1. Lead a card to start a trick.\n2. Follow suit or play a trump card if possible when responding to a lead.\n3. Play any card if unable to follow suit or trump.\n4. Strategically win or lose a trick based on the desire to draw a specific card from the stock.\n5. Draw the top card of the stock if the winner of a trick.\n6. Draw the next card of the stock if the loser of a trick.",
+    "singular_strategy": "{\"name\":\"Opponent Hand Inference\",\"description\":\"Use played cards and trick outcomes to infer the possible cards remaining in the opponent's hand, adjusting strategy accordingly to exploit weaknesses or avoid their strong plays.\",\"reason\":\"By keeping track of the play history, the AI can gain an advantage by predicting the opponent\u2019s likely holdings or lack thereof, especially in critical suits, thereby enhancing decision-making for subsequent moves.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Control Trump Flow\",\"description\":\"Strategically manage when to use trump cards to gain an advantage, while also trying to suppress the opponent's ability to win tricks with their trump cards.\",\"reason\":\"Managing trumps effectively can determine the flow of the game and control which cards are drawn from the stock. This impacts your ability to secure high-scoring cards and prevents the opponent from doing the same.\"},{\"name\":\"Stock Card Manipulation\",\"description\":\"Win or lose specific tricks to draw desired cards from the stock based on the information about the top card and the cards you have.\",\"reason\":\"This enables you to improve your hand intentionally, increasing your chances of drawing high-value cards or beneficial cards for future tricks.\"},{\"name\":\"High Card Reservation\",\"description\":\"Hold onto high cards until later in the round to ensure winning the crucial last few tricks, particularly when the stock is exhausted.\",\"reason\":\"High cards later in the game can secure important points and stop the opponent from making favorable plays, as there are no more stock cards to alter the hands.\"},{\"name\":\"Identify and Target Weaknesses\",\"description\":\"Monitor the cards played by the opponent to identify weak suits or lack of trumps, and subsequently lead these suits to force them to play disadvantageous cards.\",\"reason\":\"By recognizing patterns in the opponent's play, you can exploit weaknesses making them spend valuable cards unnecessarily or securing tricks with lower cards.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Trump Suit Control\",\"description\":\"Measures the number of trump cards in the AI player's hand, giving higher values to higher-ranked trump cards. This metric reflects the player's ability to win tricks with trumps and control the flow of the game.\"},{\"name\":\"Card Advantage\",\"description\":\"Evaluates the expected value of winning a trick based on the visible top card of the stock. The metric weighs the likelihood of beneficial card acquisition, such as acquiring high-value cards or critical trumps.\"},{\"name\":\"Suit Strength\",\"description\":\"Quantifies the strength of the AI player's cards in each non-trump suit based on card rank distribution. This informs the decision of when to lead or avoid certain suits, balancing the risk of losing control against the potential gain of winning more non-trump tricks.\"},{\"name\":\"Score Progression Potential\",\"description\":\"Assesses the potential to achieve scoring milestones (High, Low, Jack, and Game) given the current state of the hand and known cards. This metric prioritizes card plays that increase the chance of reaching the cumulative points needed to win.\"}]}",
+    "reflections": {
+        "Control Trump Flow": "{\"name\":\"Control Trump Flow\",\"reflection1\":\"The strategy mentions 'strategically manage' without specifying what makes a moment 'critical' for using trumps. Critical moments can be defined as situations where using a trump card can either win a trick that contains a high card of game-scoring value, prevent the opponent from winning a decisive trick, or are likely to allow the AI to maintain control over subsequent tricks.\",\"reflection2\":\"The strategy does not explicitly mention how game state metrics affect decisions. However, the strategy could condition its actions based on metrics such as 'Trump Suit Control', 'Card Advantage', 'Suit Strength', and 'Score Progression Potential'. These metrics can indicate the timing for using trump cards versus holding them. For instance, if 'Trump Suit Control' is high, the AI should consider using trumps to win critical tricks. If 'Card Advantage' shows a poor next card, the AI might use trumps to control the draw.\",\"content\":\"To refine the strategy, consider the following steps: 1) Use trump cards to win tricks during 'critical moments', such as when the visible stock card is of high value or when winning helps to complete a scoring milestone. 2) Monitor 'Trump Suit Control' to decide when to lead with trumps, aiming to force the opponent into less favorable plays. 3) Evaluate 'Card Advantage' and adjust the use of trumps based on potential stock gains. 4) Consider the opponent's likely strength in non-trump suits and adapt the trump usage strategy to suppress their ability to take control. 5) Use 'Suit Strength' to identify when to maintain suit control or capitalize on weak moments to change the momentum with a trump. 6) Keep 'Score Progression Potential' in mind, ensuring that trump plays support reaching or denying scoring milestones.\"}",
+        "Stock Card Manipulation": "{\"name\":\"Stock Card Manipulation\",\"reflection1\":\"The strategy to 'win or lose specific tricks to draw desired cards' requires clarity on what constitutes 'desired cards'. Desired cards could include high-value cards or trump cards, based on the current gameplay situation. Therefore, it's important to understand the types of cards that would strategically benefit a player based on their current hand and the visible card on top of the stock.\",\"reflection2\":\"The decision to win or lose a specific trick based on stock conditions can be detailed using game state metrics. For example, if 'Trump Suit Control' is high (reflecting strong trump cards in hand), the player might aim to win a trick to draw a strong non-trump card to balance their hand. If 'Suit Strength' in non-trump suits is low, the player might let the opponent win to draw a better non-trump card. Additionally, if 'Score Progression Potential' suggests a strong likelihood of achieving a scoring milestone, actions might be tailored to either enhance these chances through specific cards or disrupt the opponent's potential scoring.\",\"content\":\"Stock Card Manipulation should involve evaluating the visible top card of the stock and considering its potential to strengthen the hand, based on the current composition and future strategic goals. The strategy should be contextualized through dynamically assessing 'Trump Suit Control' to determine whether acquiring non-trump cards could improve the hand, 'Card Advantage' to decide if winning the current trick would yield a better card than losing, and 'Score Progression Potential' to align the immediate benefit of drawing a specific card with long-term scoring benefits.\"}",
+        "High Card Reservation": "{\"name\":\"Refined High Card Reservation Strategy\",\"reflection1\":\"The original strategy was vague in defining 'crucial last few tricks' or 'critical moments.' In this refined version, 'critical moments' are defined as points in the game when the stock is exhausted, or when the opponent's potential to play high trump cards or crucial non-trump cards is perceived as low based on their previous plays.\",\"reflection2\":\"The strategy should be conditioned on the 'Trump Suit Control' and 'Suit Strength' game state metrics. Specifically, holding high cards should be balanced against the player's and opponent's control over the trump suit and the strength of their non-trump suits. The decision to hold or play a high card should also factor in the 'Score Progression Potential,' especially when nearing a scoring milestone.\",\"content\":\"Incorporate a refined 'High Card Reservation' strategy where the AI player explicitly holds high cards for situations when (1) the stock is nearly or completely exhausted, increasing the importance of winning each remaining trick, and (2) the AI has less control over the trump suit or equal trump potential with the opponent as inferred from previous plays. Evaluate 'Trump Suit Control' to hold onto high trump cards if the player can win critical points (High, Low, Jack) when opponents' trump potential is minimized. Use 'Suit Strength' to decide on leading or holding high non-trump cards by balancing the risk of losing control. The strategy should dynamically adapt to 'Score Progression Potential' to maximize points, ensuring these high cards are used to secure scoring milestones when feasible.\"}",
+        "Identify and Target Weaknesses": "{\"name\":\"Refined Strategy for Exploiting Opponent's Weaknesses\",\"reflection1\":\"Clarifying critical moments within the strategy involves identifying specific instances, such as when the opponent has shown a lack of certain suited cards. This might occur if, after several tricks, they are consistently unable to follow suit or are forced to use trumps on low-value cards. In this context, critical moments are when the AI detects these patterns, indicating an opportunity to capitalize on the opponent's depleted suit or lack of trumps.\",\"reflection2\":\"The strategy is conditioned on the game state using several metrics. For example, 'Trump Suit Control' informs decisions when the AI has a dominance of trump cards, allowing it to maintain the initiative and lead in non-trump suits to draw out the opponent's high-value cards. 'Suit Strength' helps the AI decide which weak suit to lead, based on the opponent's previous inability to follow. These decisions are further supported by 'Card Advantage,' where the visible card on the stock can incentivize winning or losing a trick.\",\"content\":\"The strategy, 'Identify and Target Weaknesses,' is refined to: Monitor the opponent's play history to detect their lack of certain suits or trumps. Key moments to exploit these weaknesses are when the opponent uses trump cards excessively to win low-value tricks or visibly struggles to follow a suit. During these moments, the AI should lead with the opponent's weak suit until they are forced to play disadvantageous cards. This approach leverages 'Trump Suit Control' for dominance when trumps are in hand and 'Suit Strength' to decide which weak suits to target. Additionally, the AI should consider 'Card Advantage' by evaluating the top stock card, aiming to strategically win or lose based on the potential value acquisition of upcoming cards.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                11
+            ],
+            "metric_history": [
+                0.64
+            ],
+            "label": "ours",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                1
+            ],
+            "metric_history": [
+                0.62,
+                0.66
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                1
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                11,
+                10,
+                3
+            ],
+            "metric_history": [
+                0.455,
+                0.4625,
+                0.475
+            ],
+            "label": "ours",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                1,
+                3
+            ],
+            "metric_history": [
+                0.45,
+                0.495,
+                0.51
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        }
+    ]
+}

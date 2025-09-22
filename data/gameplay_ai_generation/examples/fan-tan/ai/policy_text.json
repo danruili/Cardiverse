@@ -1,0 +1,105 @@
+{
+    "game_description": "Rank of Cards\n\nThe cards in each suit rank: K (high), Q, J, 10, 9, 8, 7, 6, 5, 4, 3, 2, A.\n\n### The Ante\n\nEach player puts one chip in the pot before each deal.\n\n### The Deal\n\nDeal the cards one at a time face down, beginning with the player on the left. All the cards are dealt, and some players may receive fewer cards than others. It is customary for each player with fewer cards to ante one additional chip.\n\n### Object of the Game\n\nThe goal is to be the first player to get rid of all of their cards.\n\n### The Play\n\nBeginning to the left of the dealer, each person must play a card if possible.\n\nAll cards played remain face up on the table, arranged in four rows of the four suits.\n\nThe plays that may be made are:\n\nAny seven or any card in suit and sequence to a card previously played.\n\nAs the sevens are played, they are placed in a row in the center of the table.\n\nThe sixes are placed in another row to the right - the fives and lower cards in sequence are piled on the sixes.\n\nThe eights are placed on the left of the sevens in their respective suits - nines and higher cards in sequence are piled on the eights.\n\nEach player must play a card during their turn if possible; if the person cannot play, they put one chip in the pot and the turn passes to the left. The game ends when one player gets rid of all of their cards. Each opponent then pays the pot one chip for each card remaining in their hand, and the winner takes the pot.\n\n### Irregularities\n\nIf a player passes when they could have played, the offender must pay three chips into the pot. If the player passed when they were able to play a seven, they must pay an additional five chips to the players holding the six and the eight of the same suit.\n\n### How to Keep Score\n\nOne can play a series of rounds, scoring 1 point for each card each player has remaining at the end of each round. When one player reaches 100 points, the game is over and the player who then has the smallest score is the overall winner.",
+    "game_actions": "1. Play a card that is a seven.\n2. Play a card that is in suit and sequence to a card previously played.\n3. If unable to play a card, put one chip in the pot.",
+    "singular_strategy": "{\"name\":\"Optimal Card Play Strategy\",\"description\":\"Prioritize playing cards based on potential for future plays and minimizing penalties. Begin with playing a seven if available. Otherwise, play cards that continue existing sequences, starting with those that open new possibilities for your own future plays. If no appropriate card can be played and no sevens are available, reluctantly place a chip in the pot.\",\"reason\":\"The strategy prioritizes playing sevens or cards that contribute to building sequences since doing so maximizes future opportunities for the AI to play its cards quickly. Playing sevens opens up new sequence paths that can facilitate discarding multiple cards on future turns, while building on existing sequences can eliminate other cards earlier. When sequences are unavailable, playing other legal cards prevents the risk and penalties of passing, while placing a chip is used as a last resort to avoid illegal moves.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Prioritize Playing Sevens\",\"description\":\"Always play a Seven card if available, as it opens up the possibility to play both higher and lower cards in that suit.\",\"reason\":\"Playing a Seven creates two potential paths for future plays in its suit, thus giving you more opportunities to play cards in future turns and avoid penalties. This strategy directly aligns with potential action 1.\"},{\"name\":\"Play Cards That Create Future Opportunities\",\"description\":\"When not able to play a Seven, play cards that will likely facilitate your ability to play more cards in upcoming turns, such as Sixes and Eights, which border Sevens.\",\"reason\":\"Playing Sixes and Eights can help establish a foundation for playing more sequences quickly. These cards allow you to either build down or up, maximizing your chances to get rid of your cards efficiently. This relates to potential action 2.\"},{\"name\":\"Minimize Chip Penalty by Playing Agile Plays\",\"description\":\"If you cannot play cards that foster future plays, aim to play any card available to minimize facing a penalty of passing or retaining more cards.\",\"reason\":\"Avoiding placing extra chips into the pot and reducing the number of remaining cards will help you towards winning each round as quickly as possible. This strategy relates to potential action 2 in that it emphasizes the necessity of always playing a card if able.\"},{\"name\":\"Awareness of Suit Dynamics\",\"description\":\"Understand the distribution and played status of cards within each suit to anticipate what other players might use, helping you plan your plays more strategically.\",\"reason\":\"Knowing what cards are in play and what might remain can help you deduce which cards to prioritize getting rid of or keeping based on future playing opportunities or blocking others. This broad strategic awareness fits within the potential actions by enhancing decision-making over each card played.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Playable Cards Ratio\",\"description\":\"The ratio of cards in hand that can currently be played according to the game rules. A higher ratio indicates a better position to play more cards and get closer to winning the round.\"},{\"name\":\"Total Sevens Held\",\"description\":\"The number of sevens currently held by the player. Holding sevens is advantageous as they allow starting new sequences, thus reducing the player's hand size directly and providing strategic options.\"},{\"name\":\"Opponent Blocking Potential\",\"description\":\"A measure of the player's ability to block opponents from playing, based on the current lay of cards. This could be determined by the player's control over sequences and strategic card plays that limit opponents' options.\"},{\"name\":\"Chips Potential Loss\",\"description\":\"The estimated number of chips a player might lose based on their current hand and inability to play cards. This considers not only the current inability to play but also potential future penalties, influencing risk management and decision-making.\"}]}",
+    "reflections": {
+        "Prioritize Playing Sevens": "{\"name\":\"Refined Strategy for Playing Sevens\",\"reflection1\":\"The original strategy emphasizes playing Sevens, but lacks specific guidance on when this is most beneficial. Critical moments can include: (1) Early game when establishing dominance in a suit can maximize future plays, (2) When opponents have only a few cards left, to prevent them from playing easily, (3) When you have a low Playable Cards Ratio to open up more plays.\",\"reflection2\":\"The strategy can be conditioned on two game state metrics: Total Sevens Held and Opponent Blocking Potential. If a player holds multiple Sevens, prioritizing their play can maximize control over multiple suits. Meanwhile, understanding Opponent Blocking Potential can guide when to play a Seven strategically to disrupt opponent strategies.\",\"content\":\"The strategy should be refined as follows: 'Prioritize playing a Seven card if you hold more than one, as it maximizes control across different suits. Additionally, consider playing a Seven when your Playable Cards Ratio is low, or when opponents have few cards left, to disrupt their potential plays. Evaluate the Opponent Blocking Potential to make decisions that impede opponent progress while maximizing opportunities for your future plays.'\"}",
+        "Play Cards That Create Future Opportunities": "{\"name\":\"Refined Strategy for Playing Cards That Create Future Opportunities\",\"reflection1\":\"The original strategy mentions playing Sixes and Eights to 'facilitate future opportunities' which might be obscure for players who are unsure when it is strategically advantageous to play these cards over others. Clarification involves defining what conditions make playing these cards more strategic.\",\"reflection2\":\"Conditioning the strategy on game state metrics makes it more adaptable and robust. For instance, understanding the Playable Cards Ratio can guide decisions on whether to build foundations with Sixes or Eights, and managing Chips Potential Loss can help in risk mitigation by discerning when preserving specific cards is crucial.\",\"content\":\"To refine this strategy, players should first calculate the Playable Cards Ratio to assess their current opportunities. A high ratio suggests an aggressive strategy, such as playing more Sixes or Eights to increase sequence potential. Low ratio or low Total Sevens Held indicates a need to preserve key cards until they can best leverage openings into sequences. In scenarios with high Opponent Blocking Potential, players should prioritize placing Eights to obstruct opponents' ability to build upwards. Additionally, players should be mindful of the Chips Potential Loss especially if close to risking significant penalties, adapting their strategy to minimize potential loss and looking for opportunities to safely play without accruing undue risk. Critical moments to play cards like Sixes or Eights occur when these moves either significantly enhance the player's sequence completion ability or strategically disrupt opponents, especially when such plays align with a favorable Playable Cards Ratio and low Chips Potential Loss.\"}",
+        "Minimize Chip Penalty by Playing Agile Plays": "{\"name\":\"Enhanced Minimum Chip Penalty Strategy\",\"reflection1\":\"The original strategy was somewhat obscure because it didn't specify what situations could be considered critical for fostering future plays. These moments can be clarified by taking into account game state indicators like the Playable Cards Ratio or Total Sevens Held. These help determine when it is strategically advantageous to play certain cards that could also enable more plays in subsequent turns.\",\"reflection2\":\"Conditioning the strategy on game state metrics could involve monitoring the Playable Cards Ratio and Total Sevens Held. A high Playable Cards Ratio signals that the player is in a strong position to lay down cards without risk of penalty. Holding Total Sevens allows the player to open new sequences, vital if they need to minimize cards quickly. Meanwhile, the Chips Potential Loss should guide risk management by preventing large penalty accumulation.\",\"content\":\"In refining the strategy to minimize chip penalties, players should focus on maximizing their Playable Cards Ratio by playing sevens first, as these open new sequences and allow more potential plays in future turns. Prioritizing this strategy ensures that future cards can be played, reducing total card count effectively. Take stock of your Total Sevens Held, as they are a strategic asset, allowing sequences to start and potentially disrupting opponents' plans. If the Playable Cards Ratio is low, prioritize playing cards in sequence promptly to prevent penalties from accumulating. Monitor your Chips Potential Loss, using it to guide your decision on when to risk holding or playing specific cards. This data-driven approach ensures players are actively reducing their card count while avoiding potential chip penalties efficiently.\"}",
+        "Awareness of Suit Dynamics": "{\"name\":\"Refined Awareness of Suit Dynamics\",\"reflection1\":\"The strategy originally mentions 'plan your plays more strategically' without specifying the 'critical moments.' Clarifying involves identifying when a player should prioritize playing or holding certain cards. Critical moments include situations such as having an opportunity to play sevens (starting a new line), blocking opponents when they are likely close to finishing their hands, or when opponents show signs of being unable to play, maximizing their penalties.\",\"reflection2\":\"In conditioning this strategy on the game state, specific metrics such as Playable Cards Ratio, Total Sevens Held, and Opponent Blocking Potential are useful. A high Playable Cards Ratio indicates a good opportunity to aggressively play cards and potentially win the round sooner. Holding more sevens (Total Sevens Held) provides more opportunities to initiate new sequences, thus strategically significant to prioritize playing them when it can disrupt opponents. Opponent Blocking Potential should be evaluated dynamically to either maintain a block against opponents or strategically open sequences when it benefits the AI player.\",\"content\":\"To refine the strategy 'Awareness of Suit Dynamics,' the AI player should continuously assess the cards played in each suit and evaluate its own hand against this distribution. Critical strategic decisions hinge on the AI's ability to play sevens early to open up lines and reduce hand size, while vigilantly blocking opponents by holding onto cards that restrict their options when your chips' potential loss is minimal. Moreover, the AI should strive to balance between playing aggressively when the Playable Cards Ratio is high, maximizing hand reduction, and holding strategically significant cards like certain sevens when it boosts its Opponent Blocking Potential or mitigates Chips Potential Loss. This strategic awareness allows the AI to make informed decisions that optimize both immediate and long-term objectives under the rules of the game.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                1,
+                10,
+                5,
+                8
+            ],
+            "metric_history": [
+                0.26,
+                0.275,
+                0.2825,
+                0.295
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                1,
+                10,
+                5
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                3,
+                6
+            ],
+            "metric_history": [
+                0.245,
+                0.2775,
+                0.3075
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                3,
+                6
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                1,
+                10,
+                3,
+                8
+            ],
+            "metric_history": [
+                0.2525,
+                0.265,
+                0.285,
+                0.295
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                10,
+                3,
+                8
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3,
+                4
+            ],
+            "metric_history": [
+                0.2375,
+                0.2825
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                3,
+                4
+            ]
+        }
+    ]
+}

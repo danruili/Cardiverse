@@ -1,0 +1,83 @@
+{
+    "game_description": "### The Pack\n\nThe standard 52-card pack is used.\n\n### Object of the Game\n\nThe goal is to be the first player to get rid of all the cards in the player\u2019s hand.\n\n### Card Values/scoring\n\nThe first player to get rid of all of their cards wins the game. The winner collects from each other player the pip value of the cards remaining in that player\u2019s hand. Aces count 1 point each, face cards count 10 points each, and other cards count their pip value.\n\n### The Deal\n\nDeal seven cards to each player, one at a time, starting with the player to the left. The remainder of the pack is placed face down in the center of the table to form the stock.\n\n### The Play\n\nThe player to the left of the dealer leads and may play any card. Each player in turn must either follow suit or play a card of the same rank as the card lead.\n\nExample: If the jack of diamonds is lead, each player must play a diamond or any jack.\n\nIf a player cannot follow suit or play a card of the same rank, the player must draw from the stock until a play can be made. When the stock is exhausted and the player cannot play, the player simply does not play to the trick.\n\nThe highest card of the suit lead wins each trick.\u00a0The winner of each trick leads next.",
+    "game_actions": "1. Play a card that follows the suit of the card led or play a card of the same rank.\n2. Draw from the stock if unable to follow suit or play a card of the same rank, and continue drawing until a play can be made.\n3. If unable to play and the stock is exhausted, pass the turn without playing.\n4. Lead a card for the next trick if you won the previous trick.",
+    "singular_strategy": "{\"name\":\"Optimal Card Play\",\"description\":\"This strategy involves selecting the optimal card to play based on the current game state. The AI will prioritize playing high cards within the led suit if it has them, to try and win the trick. If it has no cards in the led suit, it will try to play a card of the same rank as the leading card. If it cannot play any card, it will draw from the stock until it can make a move. If the AI wins a trick and needs to lead, it will lead with a low-value card to preserve high-value cards for future potential tricks where winning could be more advantageous.\",\"reason\":\"The strategy is designed to balance between aggressively trying to win tricks and conserving high-value cards for critical points in the game. By trying to win a trick with high cards, the AI increases its chances of leading and controlling the flow of the game. Leading with low cards when possible can force opponents to use higher value cards, thus potentially increasing their penalty scores and reducing their hand count more slowly. The ability to strategically choose when to play high cards allows the AI to potentially swing momentum at critical times, while the prioritization of following suit helps maximize flexibility and minimize stock draws.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Play High Cards Early\",\"description\":\"When following suit or playing the same rank, prioritize playing high-value cards, especially face cards. This can reduce your point count faster in case others win tricks.\",\"reason\":\"By playing high cards early, you decrease the risk of being stuck with high-value cards if another player wins the game. This also could help you control the play by winning tricks with high cards.\"},{\"name\":\"Lead with Diverse Suits When Winning\",\"description\":\"When leading a trick after winning the previous one, choose a suit that hasn't been played much or at all yet. This can force other players to draw from the stock if they cannot follow.\",\"reason\":\"Leading with a new suit maximizes the chance that opponents will need to draw cards, potentially disrupting their strategy and increasing your odds of winning more tricks.\"},{\"name\":\"Track Played Cards\",\"description\":\"Keep a mental note or simple tracking of the cards that have already been played. Use this information to make tactical decisions on which cards to play or lead.\",\"reason\":\"By knowing which cards have been played, you can estimate the likelihood of other players being able to follow suits or potentially win the trick, allowing for more informed and strategic gameplay.\"},{\"name\":\"Delay Playing Aces\",\"description\":\"Keep Aces in your hand until there\u2019s significant progress in the game with reduced stock and played cards. Use them to win crucial tricks later in the game when players have fewer cards.\",\"reason\":\"Aces are low-value cards but can win tricks if played correctly. Holding onto them until later can ensure you can claim a key trick without risking losing high-point cards.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Hand Diversity Score\",\"description\":\"Measures how diverse the hand is in terms of suits and ranks. A more diverse hand provides more flexibility in following suits or playing high cards of the same rank, which can increase the chance of winning a trick. The score decreases as the hand becomes more homogenized in suit or reliant on specific ranks.\"},{\"name\":\"Winning Potential\",\"description\":\"Evaluates the potential to win the current trick based on the highest card of the led suit or matching rank available in hand. Higher values are assigned when the player holds the highest or near-highest cards of the current suit or matching ranks, indicating a greater chance of winning the trick.\"},{\"name\":\"Risk of Drawing Penalty\",\"description\":\"Assesses the likelihood and potential cost of needing to draw from the stock before being able to play. Factors include current hand suit distribution and remaining stock size. A high value indicates a greater risk of drawing, thus delaying the chance to play cards and decreasing the likelihood of winning the game quickly.\"},{\"name\":\"Lead Control Value\",\"description\":\"Determines the strategic advantage gained by leading the next trick. Evaluates the current hand's capability to take control by winning the trick and thereby allowing the selection of a beneficial suit or rank for the next round. The value is higher when the player has cards that can be well-utilized to set up favorable subsequent plays.\"}]}",
+    "reflections": {
+        "Play High Cards Early": "{\"name\":\"Play High Cards Early\",\"reflection1\":\"The strategy mentions 'playing high cards early,' which requires clarification on what 'early' means. Early could signify prioritizing high-value cards at the first opportunity when following suit or playing the same rank. This ensures high cards are used as soon as possible in a round, mitigating the risk of retention.\",\"reflection2\":\"The strategy should be conditioned on evaluating both the 'Risk of Drawing Penalty' and the 'Winning Potential.' It should prioritize high cards when there's low risk of needing to draw (indicating a diverse suit in hand) and a high chance of winning the trick (when possessing a near-highest card of the lead suit). This optimizes the immediate action with consideration to the game state.\",\"content\":\"In applying the 'Play High Cards Early' strategy, prioritize playing high-value cards at the earliest possible occasion in a trick when following suit or playing the same rank, particularly when the 'Risk of Drawing Penalty' is low, suggesting the hand is capable of responding to a variety of lead suits without needing to draw. Additionally, enhance your lead decisions by capitalizing on high 'Winning Potential' whenever your high cards are likely to win tricks and subsequently lead in a control-advantageous manner based on the 'Lead Control Value.' This involves playing a high card if the hand diversity allows flexibility and the hand contains cards which are currently among the highest in the context of gameplay, reducing the overall point count while setting strategic leads for future rounds.\"}",
+        "Lead with Diverse Suits When Winning": "{\"name\":\"Enhanced Lead Strategy with Diverse Suit Selection\",\"reflection1\":\"The original strategy suggested leading with a suit that hasn't been played much to force opponents to draw. However, it didn't specify when this would be most advantageous or how to determine the optimal suit to lead with.\",\"reflection2\":\"To refine the strategy, we need to condition it based on the 'Hand Diversity Score' and 'Lead Control Value'. These metrics provide a quantitative basis to choose when and how to implement the strategy.\",\"content\":\"When you have control of the lead, first assess your 'Hand Diversity Score'. If your hand is diverse, prioritize leading with a suit that you have fewer cards in, as it maximizes the disruption potential for opponents who may have less coverage in that suit. Additionally, factor in the 'Lead Control Value' to determine if leading with a new suit can pave the way for future favorable plays. This is particularly critical when the available stock is low, and you anticipate others may lack the necessary suit cards to follow, forcing them into unfavorable draw scenarios. By strategically leveraging both the diversity of your hand and the control value, you optimize the opportunity to gain a superior position throughout the subsequent plays.\"}",
+        "Track Played Cards": "{\"name\":\"Track Played Cards\",\"reflection1\":\"The original strategy suggests keeping track of cards without specifying when this becomes critical. Critical moments include near the end of the game when fewer cards are left to play, maximizing the chance of winning a trick, anticipating opponents' inability to follow suit, and when deciding which card to lead.\",\"reflection2\":\"The strategy is directly conditioned on several game state metrics. For example, a high Hand Diversity Score allows for more accurate predictions of what opponents can play based on tracked cards. A strong Winning Potential suggests playing high cards to win tricks is feasible. Meanwhile, Lead Control Value benefits from tracking what suits an opponent might be weak against for future trick leads.\",\"content\":\"To refine the strategy of 'Track Played Cards,' integrate it dynamically with game state metrics: Use Hand Diversity Score to track card counts effectively, apply Winning Potential to decide when to employ suits/ranks that have likely remaining advantageous cards, and use Lead Control Value to determine when leading a favorable suit could provide strategic superiority. Prioritize tracking towards game's end when opponents' options significantly narrow.\"}",
+        "Delay Playing Aces": "{\"name\":\"Refined Delay Playing Aces\",\"reflection1\":\"The original strategy mentions using Aces during 'significant progress', implying times when they could be more effective. This lacks specificity and needs clarification on what 'significant progress' entails.\",\"reflection2\":\"The strategy should be conditioned on specific game state metrics like 'Hand Diversity Score' and 'Lead Control Value', to determine the optimal time to play Aces. These metrics help assess the strategic advantage and flexibility in play, guiding when to retain or use Aces.\",\"content\":\"Hold onto Aces until reaching a mid-to-late game stage, identified when fewer than half of the stock remains or multiple players have reduced card counts in hand. Prioritize using Aces when the 'Lead Control Value' is high, indicating an opportunity to control the suit selection for subsequent rounds, and maximize their trick-winning potential without jeopardizing winning higher-value cards. Additionally, consider the 'Hand Diversity Score'; a lower score indicates a more uniform hand, making it preferable to use the Ace to secure a trick while maintaining other suit options. Lastly, if the 'Winning Potential' is high with an Ace due to absence of higher cards of the same suit among visible plays, use it to seize the lead effectively.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                11
+            ],
+            "metric_history": [
+                0.24
+            ],
+            "label": "ours",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3
+            ],
+            "metric_history": [
+                0.22
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                3
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                2,
+                6,
+                11
+            ],
+            "metric_history": [
+                0.225,
+                0.2275,
+                0.235
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                11
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5
+            ],
+            "metric_history": [
+                0.2475
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                5
+            ]
+        }
+    ]
+}

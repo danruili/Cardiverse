@@ -1,0 +1,99 @@
+{
+    "game_description": "### The Pack\n\nThe standard 52-card pack is used.\n\nShop our Hoyle 6 in 1 Fun Pack\n\n### Object of the Game\n\nThe goal is to be the first player to get rid of all the cards in your hand.\n\n### Card Values/scoring\n\nThe player who is the first to have no cards left wins the game. The winning player collects from each other player the value of the cards remaining in that player\u2019s hand as follows:\n\nEach eight = 50 points\n\nEach K, Q, J or 10 = 10 points\n\nEach ace = 1 point\n\nEach other card is the pip value\n\n### The Deal\n\nDeal 5 cards one at a time, face down, beginning with the player to the left. The balance of the pack is placed face down in the center of the table and forms the stock. The dealer turns up the top card and places it in a separate pile; this card is the \u201cstarter.\u201d If an eight is turned, it is buried in the middle of the pack and the next card is turned.\n\nThe Play\n\nStarting to the dealer\u2019s left, each player must place one card face up on the starter pile. Each card played (other than an eight) must match the card showing on the starter pile, either in suit or in denomination.\n\nExample: If the Q of Clubs is the starter, any club may be played on it or any Queen.\n\nIf unable to play, cards are drawn from the top of the stock until a play is possible, or until the stock is exhausted. If unable to play when the stock is exhausted, the player must pass. A player may draw from the stock, even though there may be a playable card in the player\u2019s hand.\n\nAll eights are wild! That is, an eight may be played at any time in turn, and the player need only specify a suit for it (but never a number). The next player must play either a card of the specified suit or an eight.",
+    "game_actions": "1. Place one card face up on the starter pile that matches the card in suit or denomination.\n2. Play an eight as a wild card, specifying a suit for the next player to follow.\n3. Draw cards from the stock until able to play, or until the stock is exhausted.\n4. Pass the turn if unable to play and the stock is exhausted.\n5. Choose to draw from the stock even if having a playable card in hand.",
+    "singular_strategy": "{\"name\":\"Optimize Card Usage\",\"description\":\"Prioritize playing cards with the highest risk of penalty points first, such as eights, face cards, and tens. Keep track of the suits and numbers that have already been played to strategize effective use of wild cards (eights) and to anticipate possible plays by opponents. Use eights strategically when holding a diverse hand, directing the play towards suits rich in offensive or advantageous cards in hand.\",\"reason\":\"Eights are costly in terms of points and provide strategic flexibility. By using higher-point cards early, the AI minimizes the penalty risk if another player wins quickly. Keeping track of the flow of the game allows the AI to use wild cards effectively and potentially disrupt opponents' strategies, maintaining an advantage in directing the game's pace and suit direction.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Play High-Value Cards Early\",\"description\":\"Focus on playing your highest-value cards (e.g., eights and face cards) early in the game.\",\"reason\":\"By getting rid of high-value cards early, you reduce the risk of being stuck with them and losing points if another player wins quickly.\"},{\"name\":\"Strategic Use of Eights\",\"description\":\"Use eights strategically to disrupt opponents' gameplay and control the game's flow by choosing suits that may hinder them based on observed play history.\",\"reason\":\"Eights are powerful wild cards that allow you to change suits. Strategically utilizing them can make it difficult for opponents to play, giving you a better chance to unload more cards.\"},{\"name\":\"Maintain Suit Diversity\",\"description\":\"Try to keep a balanced hand with a variety of suits so that you have more playable options regardless of the card turned up on the starter pile.\",\"reason\":\"A diverse hand increases the likelihood that you can match either the suit or the denomination, reducing the need to draw from the stock and thereby avoiding accumulating more cards.\"},{\"name\":\"Utilize Drawing Option Wisely\",\"description\":\"Sometimes, choose to draw even if you have a playable card, especially if that card is strategically valuable, like a wild eight or low-value card.\",\"reason\":\"This tactic can be useful to preserve strategically important cards for future turns or to gather more information about potential plays without prematurely showing the strength of your hand.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Playable Cards Count\",\"description\":\"The number of cards in the AI player's hand that can be legally played on the current starter pile card. This metric helps to evaluate the current flexibility the player has in terms of their ability to shed cards.\"},{\"name\":\"Wild Card Usage\",\"description\":\"The strategic use of eights as wild cards. This metric would consider the situation in which an eight is played and what suit is chosen, aiming to maximize future playability and disrupt opponents' potential moves.\"},{\"name\":\"Stock Card Draw Potential\",\"description\":\"The potential impact of drawing cards from the stock pile. This looks at the likelihood of drawing useful cards when the AI player chooses to draw instead of playing a card, potentially improving hand flexibility or preparing for future plays.\"},{\"name\":\"Opponent Card Count Estimation\",\"description\":\"An estimation of the number of cards remaining in the opponents' hands, inferred from the game history, especially past plays. This metric helps the AI assess the urgency of its actions, affecting decisions on whether to play conservatively or aggressively.\"}]}",
+    "reflections": {
+        "Play High-Value Cards Early": "{\"name\":\"Refined Strategy for High-Value Cards\",\"reflection1\":\"The strategy does not clarify what constitutes 'early in the game.' To refine this, we define 'early' as when the AI player or its closest opponent has more than half of their initial hand (3 or more cards). Additionally, the strategy lacks clarity on using eights. It's important to specify that eights should be used strategically to maintain the advantage or disrupt an opponent's momentum.\",\"reflection2\":\"The strategy can be conditioned on the Playable Cards Count and Opponent Card Count Estimation. For example, if the AI player has a high number of playable cards and opponents have few cards left, it becomes more urgent to offload high-value cards to prevent losing points.\",\"content\":\"Refine the strategy by focusing on early turns (while hand sizes are larger than 2 cards for the AI or opponents). Prioritize playing high-value cards when the AI has several playable options, or when opponents have few cards left. Use eights strategically to either change the suit to one that maximizes the AI's playability or to disrupt opponents' likely plays. Consider drawing from the stock at times when it could lead to a more flexible hand for future turns, but balance this with the urgency of high-value card removal.\"}",
+        "Strategic Use of Eights": "{\"name\":\"Strategic Eights Detailed Strategy\",\"reflection1\":\"The original strategy mentions using eights strategically but does not specify what 'critical moments' mean. Critical moments could include situations when the AI has a large number of cards, requiring immediate suit change to prevent further draws, or when an opponent is about to win, necessitating disruption by forcing them to draw or skip play due to an unfavorable suit.\",\"reflection2\":\"To refine the strategy based on game state, the decision to play an eight can be conditioned on metrics like 'Playable Cards Count' and 'Opponent Card Count Estimation.' For instance, play an eight to change the suit if the AI has few playable cards left and the opponent's estimated hand size is small, increasing the stakes and urgency for the AI to control the play.\",\"content\":\"To effectively utilize eights, observe these refined strategies: (1) Play an eight when your 'Playable Cards Count' is low to avoid drawing unnecessary cards. Choose a suit that you have the most cards in to maximize upcoming playable options. (2) Consider 'Opponent Card Count Estimation' to play aggressively with eights, changing suits when an opponent has a small hand to impede them and potentially force draws. (3) Monitor 'Wild Card Usage' to ensure efficient use, saving eights for either minimizing draw risks in tight situations or for turning the flow of play when opponents are close to winning. This strategic deployment of eights not only aids in flexibility but also disrupts opponent strategies, aiding in reaching the game objective of emptying the hand first.\"}",
+        "Maintain Suit Diversity": "{\"name\":\"Maintain Suit Diversity\",\"reflection1\":\"The strategy mentions maintaining a balanced hand with a variety of suits. The obscure part here is how to measure or quantify this balance across suits during play. Also, the strategy should specify scenarios such as 'critical moments' where suit diversity becomes crucial, especially when few cards are left in your hand.\",\"reflection2\":\"The strategy to maintain suit diversity can be conditioned using the game state metrics. For example, if the 'Playable Cards Count' is low, the AI should prioritize drawing cards to increase options. Additionally, the 'Stock Card Draw Potential' can inform whether drawing cards could help balance the suit diversity without tipping the hand size disadvantageously.\",\"content\":\"To refine this strategy, the AI should evaluate its hand for the number of suits present. A good balance could mean having at least one card of each suit, minimizing the risk of being unable to play. As a critical moment, if the AI's hand size becomes small (e.g., 3-4 cards), maintaining at least one card of each suit becomes more crucial to prevent getting stuck without playable cards. The AI should also consider the 'Playable Cards Count'; if it's high, it might mean sacrificing some suit diversity to shed cards quickly. If it's low, the AI might decide to draw from the stock to enhance suit flexibility. Lastly, in terms of 'Wild Card Usage', when playing an eight, the AI should select a suit that it is already well-represented in its hand or less present on the table to maintain the competitive edge.\"}",
+        "Utilize Drawing Option Wisely": "{\"name\":\"Refined Utilize Drawing Option Wisely\",\"reflection1\":\"In its original state, the strategy is not clear about what makes a card 'strategically valuable' or when it is optimal to opt for drawing instead of playing. Clarity is needed on when these scenarios apply to ensure optimal decision-making.\",\"reflection2\":\"The strategy can be conditioned on specific game state metrics to provide a more concrete decision-making framework. By aligning actions with real-time game state evaluations, the AI player can make informed choices to keep strategic leverage without unnecessary risks.\",\"content\":\"The strategy 'Utilize Drawing Option Wisely' can be refined by identifying critical moments and aligning actions with game state metrics as follows:\\n\\n1. **Critical Moments:**\\n   - **Preservation of Wild Cards:** Opt to draw instead of playing a card when holding an eight, especially if the current game state indicates that immediate disruption of opponents' plays is not necessary.\\n   - **Low Card Count in Opponents' Hands:** If opponents have one or two cards left, consider drawing to extend the game and wait for a strategic moment to drop an eight to alter the suit.\\n\\n2. **Game State Metrics:**\\n   - **Playable Cards Count:** If there are multiple playable cards in hand, drawing may be preferable to preserve certain cards like high value (10, J, Q, K) or wild eights for future pivotal plays.\\n   - **Opponent Card Count Estimation:** If the AI has estimated that opponents' hands are large, drawing cards can strategically lessen the chance of providing them with a winning play by altering the pile less predictably.\\n   - **Stock Card Draw Potential:** If drawing from the stock pile has the potential to significantly improve the AI\u2019s hand (such as when stock card analysis suggests high-value cards remain), drawing rather than playing may be beneficial.\\n\\nBy clearly defining these conditions, the AI can utilize its hand effectively, maintaining favorable play conditions while minimizing the probability of opponents winning quickly.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                11,
+                10,
+                6,
+                5
+            ],
+            "metric_history": [
+                0.55,
+                0.57,
+                0.6,
+                0.63
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                4,
+                7
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5,
+                7
+            ],
+            "metric_history": [
+                0.53,
+                0.56
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                0,
+                3
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                9,
+                5,
+                6
+            ],
+            "metric_history": [
+                0.2975,
+                0.305,
+                0.3175
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                6
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                7,
+                4,
+                1
+            ],
+            "metric_history": [
+                0.275,
+                0.295,
+                0.3125
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                4
+            ]
+        }
+    ]
+}

@@ -1,0 +1,95 @@
+{
+    "game_description": "### Rank of Cards\n\nK (high), Q, J, 10, 9, 8, 7, 6, 5, 4, 3, 2, A. (In many forms of Rummy, the ace may rank either high or low).\n\n### The Deal\n\nDealer gives one card at a time face down, beginning with the player on the left. When two people play, each person gets 10 cards. When three or four people play, each receives seven cards; when five or six play, each receives six cards. The remaining cards are placed face down on the table, forming the stock.\n\nThe top card of the stock is turned face up and becomes the upcard. It is placed next to the stock to start the discard pile.\n\nWhen two people play, the winner of each hand deals the next. When more than two play, the deal passes to next the player on the left.\n\n### Object of the Game\n\nEach player tries to form matched sets consisting of groups of three or four of a kind, or sequences of three or more cards of the same suit.\n\nAn ace counts either high or low in a sequence, and sequences may go round the corner as in K, A, 2, or A, K, Q.\n\n### The Play\n\nBeginning with the player to the left of the dealer, each player in turn may draw two cards from the stock or, before drawing those cards, two cards from the top of the discard pile. Then the player discards only one card. Play does not end until a player can lay down their entire hand at once.\n\nThe player may also lie down on the table, face up, any meld (matched set). If the player does not wish to lay down a meld, they discard one card, face up, onto the discard pile. If the player has drawn from the discard pile, they may not discard the same card on that turn.\n\n### Laying Off\n\nA player may add one or more from their hand to any matched set already shown on the table. Thus, if threes are showing, they may add the fourth three; if 10, 9, 8 are showing, he may add J, or Q, J, 7, or 7, 6.\n\n### Going Out\n\nWhen a player gets rid of all of their cards, they win the game.\n\nIf the last card of the stock has been drawn and no player has gone out, the next player in turn may either take the top of the discard pile, or may turn the discard pile over to form a new stock (without shuffling it) and draw the top card. Play then proceeds as before.\n\n### How to Keep Score\n\nA player pays only for cards in their hand, which does not form matched sets. A player pays the pip value of all unmatched cards, with the ace counting as 11 points\n\nA player goes \"rummy\" when they get rid of all cards in their hand at once, without previously having put down or laid off any cards. In this event, every other player pays double - twice what their opponents would otherwise owe.",
+    "game_actions": "1. Draw two cards from the top of the stock pile.\n2. Draw two cards from the top of the discard pile instead of from the stock pile.\n3. Discard one card from your hand to the discard pile.\n4. Lay down a meld (matched set) face up on the table if desired.\n5. Lay off by adding one or more cards from your hand to any matched set already on the table.",
+    "singular_strategy": "{\"name\":\"Rummy Condition Strategy\",\"description\":\"Focus on the rummy condition of ending the game by laying down all cards at once. Reserve powerful plays for a surprise finish to trigger double penalty to opponents.\",\"reason\":\"Going out all at once with no previous lays can catch opponents off guard, maximizing their penalties and significantly boosting your score. This can be a decisive strategy for quickly changing the momentum of the game.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Prioritize Building Melds\",\"description\":\"Focus on arranging cards in the hand into matched sets of either three or four of a kind, or sequences of three or more cards of the same suit. Discard cards that do not contribute towards completing a meld.\",\"reason\":\"By prioritizing building melds, the player can efficiently get rid of cards and work towards winning the game by 'going out.' This reduces the number of ungrouped cards which would count against the player's score if another player goes out first.\"},{\"name\":\"Strategic Discarding\",\"description\":\"Choose to discard cards that are least likely to be useful to other players based on previously observed discards and draws. Avoid discarding cards that could easily be used to complete an opponent's meld.\",\"reason\":\"Strategic discarding can prevent opponents from completing their own melds, which could enable them to go out before the AI player. By disrupting opponents' strategies, the AI increases its chance of winning.\"},{\"name\":\"Draw from Discard Pile Judiciously\",\"description\":\"Only draw from the discard pile when the top two cards can be directly used to form a meld or significantly improve the hand. Otherwise, prefer drawing from the stock pile to maintain unpredictability.\",\"reason\":\"Drawing from the discard pile reveals information about the player's strategy to opponents. By limiting draws from the discard pile to beneficial situations, the AI minimizes revealing its strategy while optimizing its hand.\"},{\"name\":\"Reserve Key Cards\",\"description\":\"Keep hold of high-value cards like aces and face cards only if they are part of an ongoing strategy to complete a meld or if they are necessary to win the game soon. Otherwise, discard them to minimize penalty points.\",\"reason\":\"Reserving key high-point cards only when beneficial prevents accruing high penalty points in the event that another player wins the round before the AI can 'go out'. This balances between forming melds and minimizing risk.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"PotentialMeldCreationValue\",\"description\":\"A metric that assesses the potential of forming new melds after drawing two cards, either from the stock pile or discard pile. It evaluates the likely improvement in the hand's structure, considering both the draw options and the current meld opportunities.\"},{\"name\":\"UnmatchedCardPenalty\",\"description\":\"A metric that evaluates the penalty incurred from holding high-value unmatched cards. This metric helps in deciding the priority of discarding high-value cards from the hand to lower potential score penalties.\"},{\"name\":\"MeldCompletionLikelihood\",\"description\":\"A metric that calculates the likelihood of completing a potential meld based on the known cards in the discard pile and the cards currently forming partial melds in hand. It helps in determining the value of laying off or holding cards for future turns.\"},{\"name\":\"OpponentInterferenceRisk\",\"description\":\"A metric that estimates the risk of laying down or discarding a card that might benefit opponents. This assessment is based on the current visible card distributions (discard pile and known melds), and helps avoid actions that could strengthen opponents\u2019 hands.\"}]}",
+    "reflections": {
+        "Prioritize Building Melds": "{\"name\":\"Refined Meld Building Strategy\",\"reflection1\":\"The initial strategy mentions discarding cards that do not contribute to melds, but does not specify situations where holding a high-value card could be strategic. For example, if holding onto a high card temporarily could complement an emerging sequence, this should be considered. Similarly, it does not mention the optimal conditions for drawing from the stock versus the discard pile.\",\"reflection2\":\"To refine the strategy: 1) Use 'PotentialMeldCreationValue' to decide between drawing from the stock or discard pile. If drawing from the discard pile offers a better potential meld creation, prioritize it. 2) Use 'UnmatchedCardPenalty' to influence discard decisions, ensuring high penalty cards are reduced. 3) Consider 'OpponentInterferenceRisk' to avoid actions that could enable opponents, such as discarding cards that complement known discard pile sequences.\",\"content\":\"To refine the strategy for building melds, the AI player should incorporate the following steps: prioritize drawing from the source that maximizes 'PotentialMeldCreationValue.' When choosing cards to discard, evaluate based on 'UnmatchedCardPenalty,' preferably discarding high-penalty cards unless they significantly contribute to potential melds. Use 'MeldCompletionLikelihood' to assess laying off opportunities. Lastly, factor in 'OpponentInterferenceRisk' to prevent assisting opponents with your discards. These criteria ensure strategic decision-making based on the game state, maximizing winning potential and minimizing penalties.\"}",
+        "Strategic Discarding": "{\"name\":\"Refined Strategic Discarding\",\"reflection1\":\"The strategy mentions avoiding discarding cards that could benefit opponents but does not specify how to determine these cards. By introducing a game state metric like 'OpponentInterferenceRisk', we can make this decision more systematic by calculating the probability that a card will benefit an opponent.\",\"reflection2\":\"The strategy needs to incorporate a decision-making process based on the current game state, particularly focusing on 'OpponentInterferenceRisk' and 'UnmatchedCardPenalty'. This means considering how the discard of a particular card might either interfere with an opponent or reduce the AI's potential penalties.\",\"content\":\"The 'Strategic Discarding' strategy is refined to systematically choose cards to discard by evaluating several game state metrics. \\n\\n1. **OpponentInterferenceRisk**: Use this metric to assess the likelihood that a discarded card will complete or assist in completing an opponent\u2019s meld. Cards with high interference risk should be kept unless they carry a significant 'UnmatchedCardPenalty'. The risk is calculated based on observed opponent patterns and known discards. \\n\\n2. **UnmatchedCardPenalty**: Assess the penalty from holding cards that are unlikely to complete a meld soon and carry a high pip value. Prioritize discarding these cards unless they possess a high 'OpponentInterferenceRisk'. \\n\\nWith these conditions, the AI player better disrupts opponents\u2019 strategies and reduces penalty risks, improving the chance of maintaining a competitive edge.\"}",
+        "Draw from Discard Pile Judiciously": "{\"name\":\"Draw from Discard Pile Judiciously\",\"reflection1\":\"The strategy mentions drawing from the discard pile when it 'significantly improve the hand'. This requires clarification. A significant improvement should be defined in terms of measurable benefits, such as increasing the MeldCompletionLikelihood substantially or forming an immediate meld.\",\"reflection2\":\"The strategy can be conditioned on the game state by using defined metrics. For example, only draw from the discard pile if PotentialMeldCreationValue is above a certain threshold. This ensures that the strategy makes use of measurable game state factors to guide decisions.\",\"content\":\"Only draw from the discard pile when the top two cards directly form a meld or increase the MeldCompletionLikelihood by 50% or more, based on the PotentialMeldCreationValue. Additionally, evaluate the UnmatchedCardPenalty to ensure that drawing cards does not excessively increase the risk of holding high-value unmatched cards. This strategy will minimize revealing strategic intent to opponents while optimizing hand composition.\"}",
+        "Reserve Key Cards": "{\"name\":\"Refined Strategic Card Holding\",\"reflection1\":\"The original strategy's reference to 'ongoing strategy to complete a meld' and 'necessary to win the game soon' needs clarification. Critical moments are when forming a meld can be completed in one or two moves given the current hand and potential future draws, or when an opponent is close to winning, requiring immediate action to minimize penalties.\",\"reflection2\":\"Conditioning on game state metrics is crucial to executing this strategy effectively. Specifically, combining 'PotentialMeldCreationValue' and 'MeldCompletionLikelihood' helps determine whether holding onto high-value cards aids in imminent meld completion. Meanwhile, 'UnmatchedCardPenalty' should continuously assess the penalty risk of holding such cards if the game seems to extend.\",\"content\":\"This refined strategy involves holding onto high-value cards like aces and face cards only when 'PotentialMeldCreationValue' is high enough to suggest that these cards are integral to completing a meld in the immediate future. A 'MeldCompletionLikelihood' above a certain threshold should be a trigger to keep these cards. The strategy should pivot to discarding high-value unmatched cards if both these metrics indicate low likelihood of imminent meld creation, leveraging 'UnmatchedCardPenalty' to continuously reduce point risk. Additionally, introduce 'OpponentInterferenceRisk' as a counterbalance; if discarding a card increases opponents' chances significantly, reconsider discarding unless absolutely necessary for penalty mitigation. Critical moments are dynamically defined through these metrics: if meld creation seems feasible within one or two upcoming turns with high-value cards or if another player seems poised to win imminently, the decision on holding or discarding must adjust accordingly.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                9,
+                4,
+                1
+            ],
+            "metric_history": [
+                0.74,
+                0.86,
+                0.88
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                9,
+                1
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5,
+                3
+            ],
+            "metric_history": [
+                0.73,
+                0.91
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                5
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                1
+            ],
+            "metric_history": [
+                0.3575
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                1
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                3,
+                5,
+                6,
+                0
+            ],
+            "metric_history": [
+                0.3208020050125313,
+                0.3775,
+                0.4675,
+                0.5125
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                5,
+                6
+            ]
+        }
+    ]
+}

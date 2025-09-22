@@ -1,0 +1,92 @@
+{
+    "game_description": "Go Fish is a fun game that will amuse and entertain even the youngest card players. It is similar to the game Authors.\n\n### The Pack\n\nThe standard 52-card pack is used. Some cards will be dealt and the rest will form the stock pile.\n\nShop our Hoyle 6 in 1 Fun Pack\n\n### Object of the Game\n\nThe goal is to win the most \"books\" of cards. A book is any four of a kind, such as four kings, four aces, and so on.\n\n### Rank of Cards\n\nThe cards rank from ace (high) to two (low). The suits are not important, only the card numbers are relevant, such as two 3s, two 10s, and so on.\n\n### The Deal\n\nAny player deals one card face up to each player. The player with the lowest card is the dealer. The dealer shuffles the cards, and the player to the right cuts them.\n\nThe dealer completes the cut and deals the cards clockwise one at a time, face down, beginning with the player to the left. If two or three people are playing, each player receives seven cards. If four or five people are playing, each receives five cards. The remainder of the pack is placed face down on the table to form the stock.\n\n### The Play\n\nThe player to the left of the dealer looks directly at any opponent and says, for example, \"Give me your kings,\" usually addressing the opponent by name and specifying the rank that they want, from ace down to two. The player who is \"fishing \u201cmust have at least one card of the rank that was asked for in their hand. The player who is addressed must hand over all the cards requested. If the player has none, they say, \"Go fish!\" and the player who made the request draws the top card of the stock and places it in their hand.\n\nIf a player gets one or more cards of the named rank that was asked for, they are entitled to ask the same or another player for a card. The player can ask for the same card or a different one. So long as the player succeeds in getting cards (makes a catch), their turn continues. When a player makes a catch, they must reveal the card so that the catch is verified. If a player gets the fourth card of a book, the player shows all four cards, places them on the table face up in front of everyone, and plays again.\n\nIf the player goes fishing without \"making a catch\" (does not receive a card he asked for), the turn passes to the left.\n\nThe game ends when all thirteen books have been won. The winner is the player with the most books. During the game, if a player is left without cards, they may (when it's their turn to play), draw from the stock and then ask for cards of that rank. If there are no cards left in the stock, they are out of the game.",
+    "game_actions": "1. Ask an opponent for specific cards of a rank that you have at least one of in your hand.\n2. Receive the asked-for cards from the opponent if they have them.\n3. Draw a card from the stock if the opponent does not have the requested cards (\"Go fish\").\n4. Continue to ask the same or another player for cards if a successful catch is made (receiving one or more asked-for cards).\n5. Reveal the completed book of four of a kind if obtained, and continue your turn.\n6. End your turn if you do not successfully receive a card you asked for.",
+    "singular_strategy": "{\"name\":\"Book Completion Focus\",\"description\":\"Assemble complete books as a priority. Redirect your strategy whenever you acquire three cards of a rank to focus heavily on obtaining the fourth card.\",\"reason\":\"Completing books not only scores points but also reduces your hand size, making your strategy more focused and giving you more opportunities to create new pairs.\"}",
+    "strategies": "{\"items\":[{\"name\":\"Memory Tracking\",\"description\":\"Keep track of all requests and responses involving ranks including opponent responses of 'Go Fish'. Use this information to deduce potential cards in opponents' hands and avoid redundant requests.\",\"reason\":\"Understanding opponent responses helps the AI deduce which players may hold certain cards. Tracking failed requests can also guide the AI to ask for ranks that are less likely to be in the opponent's hand, potentially depleting their hand faster and maximizing turns.\"},{\"name\":\"Priority on Completing Books\",\"description\":\"Focus on asking for cards of ranks that the AI has multiple cards of in its hand, prioritizing those with three cards first, then two.\",\"reason\":\"By focusing on completing books, the AI maximizes its ability to secure confirmed points, decreasing the number of cards in hand and potentially continuing its turn with additional requests or moves.\"},{\"name\":\"Opponent Weakness Exploitation\",\"description\":\"Identify opponents who appear to be low in cards or targeted by other players frequently and focus on them for requests, as they might have fewer options to respond with a 'Go Fish\u2019.\",\"reason\":\"Targeting weaker or frequently-targeted opponents increases the likelihood of the AI successfully 'fishing' cards, thus prolonging its turn and acquiring more cards to complete books.\"},{\"name\":\"Balanced Stock Utilization\",\"description\":\"When drawing from the stock, balance picks by assessing game history and adjusting probability estimations of completing books, drawing cards that make completing books more probable.\",\"reason\":\"Statistically informed draws from the stock can optimize hand structure towards completing books, while minimizing wasted turns from non-completed hands when the stock is replenished.\"}]}",
+    "metrics": "{\"items\":[{\"name\":\"Potential Book Completion\",\"description\":\"Measures the likelihood of completing a book based on current hand and previously requested cards. Calculated as the number of cards of a specific rank the player has plus the known whereabouts of other cards of the same rank based on history.\"},{\"name\":\"Opponent Vulnerability Index\",\"description\":\"Evaluates the likelihood an opponent has cards of a needed rank. This is influenced by previous interactions, such as whether the opponent asked for or supplied a card of this rank, and the general flow of cards across players.\"},{\"name\":\"Stock Dependency\",\"description\":\"Assesses the importance or risk of going fishing (drawing from stock) based on the player's current hand composition and stock size. A higher metric value indicates a greater reliance on drawing to complete books because of few opportunities to ask effectively.\"},{\"name\":\"Turn Continuation Probability\",\"description\":\"Estimates the chance of maintaining the turn after asking for a card, which combines the likelihood of making a successful request with the number of potential books that could emerge from a successful card receipt. This metric helps prioritize asking actions to balance book formation and prolonging turns.\"}]}",
+    "reflections": {
+        "Memory Tracking": "{\"name\":\"Refined Memory Tracking Strategy\",\"reflection1\":\"The original strategy mentions understanding opponent responses to deduce card locations, which is not obscure. However, it does not clearly define how to use this data to avoid redundant requests, potentially leaving the AI unsure about when to avoid asking for certain ranks or targeting specific players.\",\"reflection2\":\"The strategy can be conditioned on the game state by integrating the 'Potential Book Completion' to focus on asking for cards that would complete a book. Additionally, 'Opponent Vulnerability Index' can be used to decide which opponent to ask based on who is most likely to hold the needed cards. 'Turn Continuation Probability' can guide whether the AI should risk asking for certain cards if it would prolong their turn.\",\"content\":\"The refined Memory Tracking strategy should involve systematically updating internal records of which cards have been asked for and the responses given. This involves:\\n1. **Identify Critical Moments:** These are when a player has three of a rank and needs one more to form a book ('Potential Book Completion' is high), when an opponent has consistently asked for cards of a rank indicating they might own multiple ('Opponent Vulnerability Index' spikes), or when the player has few cards left and needs to prolong their turn ('Turn Continuation Probability' indicates a good chance to successfully acquire more cards).\\n2. **Conditioned Actions:**\\n   - Before taking any action, calculate the likelihood of success for each potential request based on historical data of opponent behaviors ('Opponent Vulnerability Index').\\n   - Prioritize asking for ranks that aid in immediate book formation or are more likely to maintain turn control based on current hand and opponents' possible holdings.\\n3. **Reducing Redundancy:** Track not just card holdings but also 'Go Fish' responses to prevent asking for ranks likely exhausted or that were met with consistent failures against specific players.\\n4. **Dynamic Adjustment:** Continuously update evaluations at each turn end to dynamically adapt to evolving card distributions and maximize potential future benefits from learned patterns.\"}",
+        "Priority on Completing Books": "{\"name\":\"Priority on Completing Books\",\"reflection1\":\"The strategy focuses on prioritizing card requests based on the number of cards in the hand for a specific rank. It could be unclear how to dynamically adjust this strategy based on changes in the game state, such as an evolving understanding of opponents' hands or the stock's depletion. Clarifying these dynamics would enhance strategic decision-making.\",\"reflection2\":\"To condition this strategy effectively on the game state, using metrics such as Potential Book Completion and Opponent Vulnerability Index would be beneficial. The strategy should dynamically adapt to these metrics, for instance, by shifting priorities when completion potential exceeds a certain threshold or when an opponent's likelihood of having the required card is high.\",\"content\":\"The AI should focus on completing books by first asking for ranks where it holds three cards, since obtaining one additional card will secure a book. If no such trio exists, it should then target ranks with two cards, aiming to increase the number of ranks for which it has three cards, improving its chance of completing a book in subsequent turns. During a turn, the AI should also consider Opponent Vulnerability Index, asking opponents previously known to hold or request cards of those ranks, thus increasing the success rate of requests. Additionally, Stock Dependency and Turn Continuation Probability should guide decisions when asking for cards of ranks with fewer cards in hand. A focus should be placed on extending turns and strategically positioning the AI to utilize stock draws effectively when other actions are unlikely to succeed.\"}",
+        "Opponent Weakness Exploitation": "{\"name\":\"Opponent Weakness Exploitation\",\"reflection1\":\"The strategy mentions targeting weaker or frequently-targeted opponents. However, it doesn't specify what constitutes an opponent being 'weak' or 'frequently-targeted'. These concepts need clarification for precise implementation. For example, 'weak' could be described as players who have been unable to deny requests consistently, while 'frequently-targeted' could be players who have received multiple requests from others, indicating they hold cards that are in demand.\",\"reflection2\":\"This strategy could be conditioned on the 'Opponent Vulnerability Index'. By using this index, the AI can identify which opponents are more likely to have the cards it needs. The index leverages game history such as past interactions and card exchanges to calculate which opponents should be targeted to maximize the chances of successfully continuing a turn.\",\"content\":\"The refined strategy entails identifying opponents with a high 'Opponent Vulnerability Index'\u2014those who have usually complied with card requests from the AI or other players. These opponents are more likely to hold cards required by the AI. The strategy should prioritize these players to increase the potential for successfully fishing cards, prolonging the turn, and forming more books. By using the game state metric like 'Opponent Vulnerability Index', the AI can dynamically adjust its target based on the changing game state and opponent behavior throughout the game.\"}",
+        "Balanced Stock Utilization": "{\"name\":\"Refined Balanced Stock Utilization\",\"reflection1\":\"The original strategy mentions optimizing hand structure for completing books while minimizing wasted turns, but it lacks concrete mechanisms for deciding when to draw from the stock. Clarification is needed on how to assess 'critical moments' for drawing.\",\"reflection2\":\"To condition the strategy on the game state, we should leverage specific metrics that influence decision-making about drawing from the stock. The strategy should be directly tied to measurable game states like Potential Book Completion, Stock Dependency, and Turn Continuation Probability.\",\"content\":\"Refined Balanced Stock Utilization involves a detailed process of deciding when to draw from the stock based on the current game state:\\n\\n1. **Assess Potential Book Completion**: Monitor how many cards of a specific rank you currently hold and track past requests to estimate the likelihood of completing a book. Prioritize ranks with the highest potential when drawing from the stock.\\n\\n2. **Evaluate Opponent Vulnerability Index**: Calculate the chances that an opponent possesses the needed rank. This involves tracking their requests and responses. If Opponent Vulnerability Index is low, shift focus to drawing from the stock.\\n\\n3. **Determine Stock Dependency**: If you have a high dependency on the stock due to lacking synergies in your hand, prioritize ranks where drawing a card could complete a book or provide the ability to ask effectively in future turns.\\n\\n4. **Calculate Turn Continuation Probability**: Use this to decide whether it's more advantageous to fish directly from the stock or continue asking players where the chance of prolonging your turn is higher. Opt to draw if it promises a better setup for future actions.\\n\\nBy utilizing these metrics, the AI optimally decides whether to draw from the stock or request from opponents, increasing efficiency in book completion and turn continuation.\"}"
+    },
+    "feature_selection": [
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                2,
+                9,
+                10
+            ],
+            "metric_history": [
+                0.35,
+                0.3875,
+                0.4275
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                2
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5
+            ],
+            "metric_history": [
+                0.3975
+            ],
+            "label": "-reflection",
+            "flipped_indices": []
+        },
+        {
+            "model_file_paths": [
+                "policy_reflect_fixed.json",
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                4,
+                0
+            ],
+            "metric_history": [
+                0.39,
+                0.4175
+            ],
+            "label": "ours",
+            "flipped_indices": [
+                0
+            ]
+        },
+        {
+            "model_file_paths": [
+                "policy_strategy_fixed.json",
+                "policy_metric_fixed.json"
+            ],
+            "final_selected_indices": [
+                5,
+                2,
+                4,
+                3
+            ],
+            "metric_history": [
+                0.37,
+                0.3775,
+                0.3975,
+                0.415
+            ],
+            "label": "-reflection",
+            "flipped_indices": [
+                2,
+                3
+            ]
+        }
+    ]
+}

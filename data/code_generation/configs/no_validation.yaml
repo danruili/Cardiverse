@@ -1,0 +1,45 @@
+# Our work in varied setting
+
+game_desc_dir: data/code_generation/example_test_set
+output_dir: data/code_generation/example_code_output/no_validation/
+temp_dir: default  # will be set to output_dir/temp
+log_file_path: default  # will be set to output_dir/process.log
+batch_size: 3
+timeout: 3600  # in seconds
+
+pipeline:
+  llm_model: gpt-4o-2024-08-06 
+  repetition: 3  # run the whole pipeline k times and keep the best result
+
+  # Step 1: Structurize the game description
+  structurize_game_desc: True
+
+  # Step 2: Retrieve similar examples
+  retrieval:
+    library_path: data/code_generation/example_lib
+    init_retrieval_num: 5
+    final_example_num: 2
+
+  # Step 3: Code drafting
+  init_llm_model: gpt-4o-2024-08-06  # when code is firstly created
+  self_refinement_repetition: 2
+
+  # Step 4: Iterative test and validate
+  test_and_validate:
+    max_edits: 30
+    init_credits: 15
+    reward_and_penalty:
+      loop: -1
+      validate: 1
+      execute: 0.2
+    enable_info: False  # Whether to include game comments in the gameplay log for later validation
+
+    test:
+      repetition: 10
+      timeout: 8  # in seconds
+      debug_example_num: 2
+
+    enable_validation: False
+    validate:
+      coding_llm_model: gpt-4o-2024-08-06
+      repetition: 5
