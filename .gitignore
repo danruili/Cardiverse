@@ -229,3 +229,5 @@ __marimo__/
 # Ignore indexing folder and output folder for code generation
 data/code_generation/example_lib/indexing/*
 data/code_generation/example_code_output/*
+
+other_data/
