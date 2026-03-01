@@ -1,0 +1,11 @@
+div[attr-title="Has Drawn Cards This Turn"],
+div[attr-title="Current Player"],
+div[attr-title="Final Showdown"],
+div[attr-title="Viewer Player"],
+div[attr-title="Score"] {
+    display: none;
+}
+
+div[card-title="Hand Size"] .card-zone-title {
+    display: none;
+}

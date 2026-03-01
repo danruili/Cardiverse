@@ -100,6 +100,17 @@
                   </a>
                 </span>
 
+                <!-- Arxiv PDF link -->
+                <span class="link-block">
+                  <a href="static/pdfs/EMNLP_main-3483.pdf" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Poster</span>
+                  </a>
+                </span>
+
             </div>
           </div>
         </div>
@@ -142,21 +153,29 @@
 <!-- End paper abstract -->
 
 
-<!-- Paper poster -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title">Poster</h2>
-
-      <!-- TODO: Replace with your poster PDF -->
-      <iframe  src="static/pdfs/EMNLP_main-3483.pdf" width="100%" height="550" maxwidth="200px">
-          </iframe>
-        
+<!-- Game demo -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="is-centered has-text-centered column">
+      <h2 class="title is-3">Game Demo</h2>
+      <div class="has-text-justified has-text-centered">
+        <p>Try playing the demo game with <b>Cardiverse-generated</b> AI opponents! The source code for the demo game is available in the <a href="https://github.com/danruili/Cardiverse/tree/website" target="_blank">website branch</a> of the Cardiverse GitHub repository.</p>
       </div>
     </div>
-  </section>
-<!--End paper poster -->
-
+    <div style="width: 100%; height: 500px; overflow: hidden; border-radius: 8px;">
+      <iframe
+        src="static/gameDemo/game.html"
+        title="Cardiverse Game Demo"
+        allowfullscreen
+        allow="fullscreen"
+        width="166.67%"
+        height="833"
+        style="border: 0; transform: scale(0.6); transform-origin: top left;">
+      </iframe>
+    </div>
+  </div>
+</section>
+<!-- End game demo -->
 
 <!--BibTex citation -->
   <section class="section" id="BibTeX">
@@ -182,8 +201,7 @@
     url = "https://aclanthology.org/2025.emnlp-main.1511/",
     doi = "10.18653/v1/2025.emnlp-main.1511",
     pages = "29735--29762",
-    ISBN = "979-8-89176-332-6",
-    abstract = "The prototyping of computer games, particularly card games, requires extensive human effort in creative ideation and gameplay evaluation. Recent advances in Large Language Models (LLMs) offer opportunities to automate and streamline these processes. However, it remains challenging for LLMs to design novel game mechanics beyond existing databases, generate consistent gameplay environments, and develop scalable gameplay AI for large-scale evaluations. This paper addresses these challenges by introducing a comprehensive automated card game prototyping framework. The approach highlights a graph-based indexing method for generating novel game variations, an LLM-driven system for consistent game code generation validated by gameplay records, and a gameplay AI constructing method that uses an ensemble of LLM-generated action-value functions optimized through self-play. These contributions aim to accelerate card game prototyping, reduce human labor, and lower barriers to entry for game developers."
+    ISBN = "979-8-89176-332-6"
 }</code></pre>
     </div>
 </section>

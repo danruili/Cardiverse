@@ -1,0 +1,35 @@
+:root {
+    --card-width: clamp(45px, 8vw, 70px);
+    --card-height: clamp(60px, 12vw, 105px);
+    --card-skip: calc(var(--card-width) * 0.48);
+    --card-top: calc(var(--card-height) * 0.65);
+    --card-row: clamp(3px, 0.35vw, 6px);
+    --theme-1: #466d4f;
+    --theme-2: #45382d;
+    --theme-3: #32354b;
+    --theme-4: #1f1d35cf;
+    --shade-dark-1: #00000035;
+    --shade-dark-2: #00000050;
+    --shade-dark-3: #00000085;
+}
+
+@font-face {
+    font-family: "CrayonLibre";
+    src: url("./CrayonLibre-Regular.ttf") format("truetype");
+    font-weight: normal;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Orbitron", sans-serif;
+    color: #ffffff;
+    /* background-color: var(--theme-1);
+    background: radial-gradient(circle at center, #60926a 0%, #37573f 100%); */
+    background-image: url("../images/background.png");
+    background-size: cover;
+    background-position: center;
+}

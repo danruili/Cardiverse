@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Play in Cardiverse</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="./js/cards.js"></script>
+    <script src="./js/baseEngine.js"></script>
+
+    <script src="./js/goFishVariationGame.js"></script>
+    <script src="./js/goFishVariationHeuristicAgent.js"></script>
+
+    <script src="./js/actionBoard.js"></script>
+    <script src="./js/messageList.js"></script>
+    <script src="./js/gameBoard.js"></script>
+    <script src="./js/animationSystem.js"></script>
+    <script src="./js/refreshUI.js"></script>
+    <script src="./js/app.js"></script>
+    <link rel="stylesheet" href="./css/main.css"></link>
+
+  </head>
+  <body>
+    <div id="game-controls">
+        <button id="game-controls-toggle" type="button" aria-expanded="false" aria-controls="game-controls-paper">
+          Menu
+        </button>
+        <div id="game-controls-paper">
+          <div id="game-controls-row">
+            <button id="game-history-button" type="button" aria-expanded="false">History</button>
+            <button id="game-restart-button" type="button">Restart</button>
+            <button id="game-settings-button" type="button">Settings</button>
+            <button id="game-instructions-button" type="button">Help</button>
+            <button id="game-main-menu-button" type="button">Main Menu</button>
+          </div>
+        </div>
+        <div id="game-history-panel"></div>
+    </div>
+	  <!-- Use HUD for Score, High Score, and Other Game Information -->
+    <div id="hud"></div>
+
+    <div id="start-menu-screen" class="screen">
+        <div class="container">
+            <div class="game-title">
+              play with heuristics in Cardiverse..
+            </div>
+            <div class="game-bubble-picker" role="group" aria-label="Choose a game">
+
+              <button class="game-bubble action-button" type="button" data-game-id="go-fish-misdirection" aria-label="Start Go Fish: Misdirection">
+                <img src="./images/go-fish-logo.png" alt="Go Fish: Misdirection" />
+                <span>Go Fish</span>
+              </button>
+
+            </div>
+            <select id="game-selector"></select>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <div class="container">
+            <div id="player-category-settings"></div>
+            <button id="settings-apply-button">Apply & Restart</button>
+        </div>
+    </div>
+
+    <div id="instructions-screen" class="screen">
+        <div class="container">
+  <div id="instructions-content" tabindex="0">
+
+
+    <div data-instructions-game="go-fish-misdirection" style="display: none;">
+      <h2>Go Fish Instructions</h2>
+      <p>
+        Ask any opponent for any rank. If they have it, they give you all cards of that rank and you keep
+        playing. If not, you draw from stock.
+      </p>
+
+      <h3>Goal</h3>
+      <p>Collect the most books (four cards of the same rank).</p>
+
+      <h3>Turn Overview</h3>
+      <ul>
+        <li>Choose a target player and a rank to request.</li>
+        <li>If successful, receive all matching cards and continue your turn.</li>
+        <li>If unsuccessful, Go Fish: draw one card, then turn passes.</li>
+        <li>Any set of 4 matching ranks becomes a revealed book immediately.</li>
+      </ul>
+
+      <h3>Misdirection Rule</h3>
+      <ul>
+        <li>You may request ranks you do not currently hold.</li>
+        <li>You may use requests to mislead opponents and infer their hands.</li>
+      </ul>
+
+      <h3>Game End</h3>
+      <p>
+        The game ends when all 13 books are collected, or when stock is exhausted. Most books wins.
+      </p>
+    </div>
+
+  </div>
+
+            <button id="instructions-back-button">Back</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+      <div class="bottom-area">
+        <div class="action-board-wrapper"></div>
+        <div class="current-player-info-wrapper"></div>
+      </div>
+      <div class="observation-area">
+          <div id="game-title-watermark">Card Game Hub</div>
+          <div class="game-board-wrapper">
+            <div class="public-wrapper">
+              <div class="public-info-wrapper"></div>
+            </div>
+            <div class="player-info-wrapper"></div>
+          </div>
+      </div>
+    </div>
+
+    <div id="game-over-screen" class="screen">
+        <div class="container">
+            <div id="game-over-message"></div>
+            <button id="play-again-button">Play Again</button>
+            <button id="main-menu-button">Main Menu</button>
+        </div>
+    </div>
+    <!-- <audio autoplay="" id="background-music" loop="">
+      <source src="background-music.mp3" type="audio/mpeg" />
+    </audio>
+    <audio id="start-game-sound">
+      <source src="start-game-sound.mp3" type="audio/mpeg" />
+    </audio> -->
+    <!--Extra audio tags for sound effects-->
+  </body>
+</html>

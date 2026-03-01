@@ -1,0 +1,437 @@
+.observation-area {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    height: min(55vh, 760px);
+    width: min(1120px, 96vw);
+}    
+
+.game-board-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+}
+
+#game-title-watermark {
+    position: absolute;
+    top: 85%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: min(50vw, 800px);
+    pointer-events: none;
+    color: rgba(27, 20, 15, 0.874);
+    font-family: "CrayonLibre", sans-serif;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 0.95;
+    /* letter-spacing: 0.08em; */
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(18, 7, 0, 0.24);
+}
+
+.bottom-area {
+    display: grid;
+    width: min(1120px, 96vw);
+    z-index: 10;
+    gap: 8px;
+}
+
+
+.player-info-wrapper-left,
+.player-info-wrapper-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.public-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.public-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    /* width: min-content; */
+}
+
+.card {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    padding: calc(var(--card-width) * 0.05);
+    overflow: hidden;
+    width: var(--card-width);
+    height: var(--card-height);
+}
+
+.card-movement-ghost {
+    position: fixed;
+    margin: 0 !important;
+    pointer-events: none;
+    z-index: 5000;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
+}
+
+.card-animation-hidden {
+    opacity: 0;
+}
+
+.card-flip {
+    background-image: url("./images/card-back.png");
+    background-size: cover;
+}
+
+.card .rank,
+.card .suit,
+.card .field {
+    font-size: calc(var(--card-width) * 0.4);
+    text-align: left;
+}
+
+.card .rank,
+.card .field {
+    font-weight: bold;
+}
+
+.card .num-label {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 24px;
+    height: 24px;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 20px;
+    padding: 0 4px;
+    background-color: #5a4825;
+    text-align: center;
+    color: #ffffff;
+    border-radius: 50%;
+    border: 1.5px solid #ffffff;
+    box-sizing: border-box;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65);
+    z-index: 3;
+}
+
+.card .field {
+    color: black;
+    display: none;
+}
+
+.cards {
+    height: calc(var(--card-height) * 1.2);
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.sub-card-zone {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.player-index,
+.card-zone-title {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: white;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+}
+
+.player-index {
+    text-align: center;
+}
+
+.player-category-badge {
+    font-size: 10px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #f6ecd9;
+    background: rgba(32, 22, 14, 0.88);
+    border: 1px solid rgba(255, 223, 150, 0.65);
+    border-radius: 999px;
+    padding: 4px 7px;
+}
+
+.card-zone {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-zone-container,
+.card-zone-container-left,
+.card-zone-container-right {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.card-zone-container {
+    justify-content: center;
+    max-width: 100vw;
+}
+
+.card-zone-container-left {
+    justify-content: flex-start;
+}
+
+.card-zone-container-right {
+    justify-content: flex-end;
+}
+
+.attr-field {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    background-color: var(--shade-dark-2);
+    border-radius: 5px;
+    padding: 2px;
+    color: white;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.attr-container {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.player-attr-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: max-content;
+    align-items: center;
+}
+
+.portrait-contrainer {
+    width: 50px;
+    height: 50px;
+    background-image: url("./images/player.png");
+    background-size: cover;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.player-profile-current-player .portrait-contrainer {
+    display: block;
+}
+
+.portrait-contrainer.active {
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.95), 0 0 22px rgba(255, 211, 77, 0.55);
+}
+
+.player-profile,
+.player-profile-current-player {
+    flex-direction: row;
+    margin: 5px;
+    padding: 5px;
+    display: flex;
+    gap: 10px;
+    max-width: 100vw;
+}
+
+.winner-profile {
+    border-radius: 12px;
+    box-shadow: 0 0 18px rgba(255, 214, 92, 0.95), inset 0 0 8px rgba(255, 214, 92, 0.5);
+}
+
+.winner-avatar {
+    box-shadow: 0 0 16px rgba(255, 214, 92, 1);
+    border: 2px solid #ffd65c;
+    border-radius: 50%;
+}
+
+.player-profile-current-player.winner-profile .portrait-contrainer.winner-avatar {
+    display: block;
+}
+
+.west-player,
+.east-player {
+    bottom: 0;
+    position: absolute;
+    flex-direction: column;
+    max-width: 30%;
+}
+
+.west-player {
+    left: 0;
+}
+
+.north-player {
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    position: absolute;
+}
+
+.east-player {
+    right: 0;
+    align-items: flex-end;
+}
+
+.east-player .card-zone-container,
+.west-player .card-zone-container {
+    flex-direction: column;
+}
+
+.current-player-profile-container {
+    display: grid;
+    justify-content: center;
+}
+
+.public-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.public-profile .card-zone-container {
+    /* flex-direction: column; */
+    align-items: center;
+}
+
+.current-player {
+    background-color: var(--shade-dark-2);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.cards .card {
+    margin: 0;
+    transform: translate(
+        calc(var(--col, 0) * var(--card-skip) + var(--row, 0) * var(--card-row)),
+        calc(var(--row, 0) * var(--card-top))
+    );
+    z-index: var(--z, 1);
+}
+
+
+
+
+
+.action-arg-key {
+    background-color: #4a4a4a;
+    border-radius: 5px;
+    font-size: smaller;
+    text-align: center;
+    padding: 3px;
+}
+
+.action-arg-val {
+    text-align: center;
+}
+
+.card-action-button {
+    min-width: calc(3em + -3px);
+    min-height: 4.5em;
+    padding: 0 !important;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.card-action-button .card {
+    position: static;
+    transform: none;
+    margin: 0;
+}
+
+.back-action-button {
+    z-index: 100;
+}
+
+.action-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    min-height: 45px;
+    max-height: min(35vh, 180px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-content: flex-start;
+}
+
+.card-action-container {
+    row-gap: 30px;
+}
+
+.action-hint {
+    box-shadow: 0 0 10px rgba(255, 104, 152, 1);
+}
+
+.message-wrapper {
+    display: none;
+}
+
+.msg-list {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-top: 0;
+}
+
+.msg-list .msg-container {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    color: #f2f2f2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+    width: 100%;
+    max-width: min(360px, 90vw);
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background-color: rgba(6, 26, 14, 0.92);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.msg-list .msg {
+    padding: 2px 0;
+}
+
+.public-profile .msg-container .msg {
+    width: 100%;
+    text-align: left;
+}
