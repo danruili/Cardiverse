@@ -89,6 +89,17 @@
                   </a>
                 </span>
 
+                <!-- Proceeding link -->
+                <span class="link-block">
+                  <a href="https://aclanthology.org/2025.emnlp-main.1511/" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fas fa-link"></i>
+                  </span>
+                  <span>Proceeding</span>
+                  </a>
+                </span>
+
                 <!-- Github link -->
                 <span class="link-block">
                   <a href="https://github.com/danruili/Cardiverse" target="_blank"
@@ -100,7 +111,7 @@
                   </a>
                 </span>
 
-                <!-- Arxiv PDF link -->
+                <!-- Poster PDF link -->
                 <span class="link-block">
                   <a href="static/pdfs/EMNLP_main-3483.pdf" target="_blank"
                   class="external-link button is-normal is-rounded is-dark">
@@ -120,17 +131,15 @@
 </section>
 
 
+
 <!-- Teaser video-->
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
+      <p class="subtitle has-text-centered">
+        Powered by LLMs, Cardiverse offers <b>one-stop solution</b> for card game prototyping: </br>ideation, code development, and AI gameplay.
+      </p>
       <img src="static/images/banner.png" alt="Banner"/>
-      <h2 class="subtitle has-text-centered">
-        Cardiverse is an LLM-powered framework for rapid card game prototyping. It: </br>
-     </br>Generates <b>📊 novel game mechanics</b> via graph-based indexing.</br>
-     </br>Produces <b>💻 consistent</b> game code validated by gameplay records.</br>
-     </br>Builds 🤖 <b>scalable</b> gameplay AI through self-play-optimized heuristics.
-      </h2>
     </div>
   </div>
 </section>
@@ -152,17 +161,89 @@
 </section>
 <!-- End paper abstract -->
 
+<section class="section">
+  <div class="container is-max-desktop content">
+      <h2 class="title has-text-centered">Create Game Variants</h2>
+
+      <div class="columns"> 
+        <div class="column is-one-third">
+          <img class="column" src="static/images/idea_0.png" alt="Banner"/>
+          <p>Given a library of card game descriptions, while we could just prompt LLMs to design new games (i.e. different from existing ones) by feeding all descriptions, this approach creates overload to LLM reasoning. We need to break down and digest the data first.</p>
+        </div>
+        <div class="column is-one-third">
+          <img class="column" src="static/images/idea_1.png" alt="Banner"/>
+          <p>To break down game concepts, we use LLMs to convert game description texts to <strong>game mechanic graphs</strong> that describe the dependencies between atomic game mechanics. </p>
+        </div>
+        <div class="column is-one-third">
+          <img class="column" src="static/images/idea_2.png" alt="Banner"/>
+          <p>For all mechanic graphs generated from the library, we cluster similar nodes and use LLMs to design <strong>new game mechanic instances</strong>. Then we can mutate any game input using new instances.</p>
+        </div>
+      </div>
+      
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop content">
+      <h2 class="title has-text-centered">Develop Game Environment</h2>
+
+      <div class="columns is-vcentered"> 
+        <div class="column is-one-third">
+          <img class="column" src="static/images/code_0.png" alt="code"/>
+        </div>
+        <div class="column">
+          <p>Cardiverse uses an iterative refinement loop to align game environment to game description:</p>
+          <ul>
+          <li>LLM drafts initial code.</li>
+          <li>Code runs in custom game engine that produce gameplay records.</li>
+          <li>LLM checks records for rule violations, then refines code. Repeat until no violations are found.</li>
+          </ul>
+        </div>
+      </div>
+      
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop content">
+      <h2 class="title has-text-centered">Build Gameplay AI</h2>
+
+      <div class="columns"> 
+        <div class="column is-one-third">
+          <img class="column" src="static/images/gameai_0.png" alt="Banner"/>
+          <p>Instead of calling LLMs at each game decision, Cardiverse formulates the gameplay AI as a <strong>heuristic Python function</strong> that scores potential game actions based on game state features.</p>
+        </div>
+        <div class="column is-one-third">
+          <img class="column" src="static/images/gameai_1.png" alt="Banner"/>
+          <p>To efficiently optimize the policy behind the heuristic function, we break one big heuristic function into smaller, more manageable components. Then we directly optimize the <strong>ensemble</strong> of components.</p>
+        </div>
+        <div class="column is-one-third">
+          <img class="column" src="static/images/gameai_2.png" alt="Banner"/>
+          <p>We adopt a step-wise-inclusion method, where we progressively add one more component to the heuristic ensemble as the final optimized policy.</p>
+        </div>
+      </div>
+      
+  </div>
+</section>
+
+
 
 <!-- Game demo -->
 <section class="section">
   <div class="container is-max-desktop">
     <div class="is-centered has-text-centered column">
-      <h2 class="title is-3">Game Demo</h2>
-      <div class="has-text-justified has-text-centered">
+      <h2 class="title">Game Demo</h2>
+      <div class="subtitle has-text-centered">
         <p>Try playing the demo game with <b>Cardiverse-generated</b> AI opponents! The source code for the demo game is available in the <a href="https://github.com/danruili/Cardiverse/tree/website" target="_blank">website branch</a> of the Cardiverse GitHub repository.</p>
       </div>
     </div>
-    <div style="width: 100%; height: 500px; overflow: hidden; border-radius: 8px;">
+    <div class="has-text-centered mb-2">
+      <button id="game-demo-fullscreen-btn" class="button is-small is-dark" type="button">
+        Full Screen Mode
+      </button>
+    </div>
+    <div id="game-demo-container" style="width: 100%; height: 500px; overflow: hidden; border-radius: 8px;">
       <iframe
         src="static/gameDemo/game.html"
         title="Cardiverse Game Demo"
@@ -232,5 +313,49 @@
 
     <!-- End of Statcounter Code -->
 
+  <script>
+    (function () {
+      var fullscreenButton = document.getElementById('game-demo-fullscreen-btn');
+      var gameContainer = document.getElementById('game-demo-container');
+      var gameFrame = gameContainer ? gameContainer.querySelector('iframe') : null;
+
+      if (!fullscreenButton || !gameContainer || !gameFrame) {
+        return;
+      }
+
+      function setEmbeddedMode() {
+        gameContainer.style.height = '500px';
+        gameFrame.style.width = '166.67%';
+        gameFrame.style.height = '833px';
+        gameFrame.style.transform = 'scale(0.6)';
+      }
+
+      function setFullscreenMode() {
+        gameContainer.style.height = '100%';
+        gameFrame.style.width = '100%';
+        gameFrame.style.height = '100%';
+        gameFrame.style.transform = 'scale(1)';
+      }
+
+      fullscreenButton.addEventListener('click', function () {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+          return;
+        }
+        gameContainer.requestFullscreen();
+      });
+
+      document.addEventListener('fullscreenchange', function () {
+        var isGameFullscreen = document.fullscreenElement === gameContainer;
+        fullscreenButton.textContent = isGameFullscreen ? 'Exit Full Screen' : 'Full Screen';
+
+        if (isGameFullscreen) {
+          setFullscreenMode();
+        } else {
+          setEmbeddedMode();
+        }
+      });
+    })();
+  </script>
   </body>
   </html>
