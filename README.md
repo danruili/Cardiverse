@@ -8,7 +8,7 @@
 
 Cardiverse is an LLM-powered framework for rapid card game prototyping. It:
 
-* Generates **📊 novel game mechanics** via graph-based indexing.
+* Generates **📊 novel game variants** via graph-based indexing.
   
 * Produces **💻 consistent game code** validated by gameplay records.
 
@@ -21,7 +21,7 @@ We also present an **🃏 LLM Gameplay AI Arena** for card games, supporting a d
 
 ### Table of Contents
 - [Installation](#installation)
-- [Game Mechanic Generation](#game-mechanic-generation)
+- [Game Variants Generation](#game-variants-generation)
 - [Game Code Generation](#game-code-generation)
 - [GameplayAI Generation](#gameplayai-generation)
 - [LLM Gameplay AI Arena](#llm-gameplay-ai-arena)
@@ -41,14 +41,104 @@ Remember to set your OpenAI API key in the environment:
 export OPENAI_API_KEY="your_api_key"
 ```
 
-## Game Mechanic Generation
+## Game Variants Generation
 
-We propose an indexing method that represents games as mechanic graphs, providing a global view of existing databases to guide design. This approach enables the creation of novel game variations that are intentionally distinct from prior designs.
+We propose an indexing method that represents games as mechanic graphs, providing a global view of existing databases to guide design. This approach enables the creation of novel game variants that are intentionally distinct from prior designs.
 
 ![Graph-based Game Mechanic Generation](docs/game_mechanic_generation.png)
 
+### 🚀 Usage
 
-> We are still organizing the code and instructions for game mechanic generation. We hope to release it by the end of November 2025.
+#### Indexing the game library
+Run these three steps in order:
+
+1. Extract entity graphs from game descriptions into the working database:
+
+    ```bash
+    python -m GameIdea.indexing.entity_extraction --working-dir outputs/graph --game-desc-folder  data/game_ideation/example_test --llm-model gpt-4.1
+    ```
+    Optional examples:
+    ```bash
+    # Extract a single file
+    python -m GameIdea.indexing.entity_extraction --working-dir outputs/graph --game-desc-file  data/game_ideation/example_test/black_peter.md
+    ```
+
+2. Build embeddings, projections, and group IDs:
+
+    ```bash
+    python -m GameIdea.indexing.entity_grouping --working-dir outputs/graph --node-type entity
+    ```
+
+3. Build concept clusters and concept hierarchy:
+
+    ```bash
+    python -m GameIdea.indexing.concept_build \
+      --working-dir outputs/graph \
+      --llm-model gpt-4.1 \
+      --within-threshold-depth0 4 \
+      --within-threshold-depth1 4 \
+      --within-threshold-depth2 5 \
+    ```
+
+#### Ideation CLIs
+
+Create game variants for all indexed games:
+
+```bash
+python -m GameIdea.ideation.game_mutate \
+  --working-dir outputs/graph \
+  --source-desc-folder  data/game_ideation/example_test \
+  --source-desc-ext .md \
+  --llm-model gpt-4.1 \
+  --core-prompts-path GameIdea/llm_op/mutated_game_prompts.json \
+  --parallel-llm-call-limit 8
+```
+
+Optional: Variate only one game:
+
+```bash
+python -m GameIdea.ideation.game_mutate \
+  --working-dir outputs/graph \
+  --source-desc-folder  data/game_ideation/example_test \
+  --source-desc-ext .md \
+  --game-name black_peter
+```
+
+By default, `game_mutate` skips games that already have `outputs/graph/variations/<game_name>`. Add `--overwrite` to regenerate.
+
+Optional: Inspect inspiration prompts for a single game:
+
+```bash
+python -m GameIdea.ideation.get_inspiration \
+  --working-dir outputs/graph \
+  --game-name black_peter \
+  --top-k 5 \
+  --report-path outputs/graph/reports/black_peter.md \
+  --save-prompts outputs/graph/reports/black_peter_prompts.md
+```
+
+#### Evaluation CLIs
+
+Evaluate similarities within generated variations:
+
+```bash
+python -m GameIdea.evaluation.sim_within \
+  --working-dir outputs/graph \
+  --percentiles 0.75 0.5 0.25 0.05
+```
+
+Useful options:
+- `--overwrite-group1-embs`: recompute embeddings for `cardiverse` variations instead of reusing cached `embeddings.pkl`.
+
+Evaluate similarity of generated variations against the database descriptions:
+
+```bash
+python -m GameIdea.evaluation.sim_to_db \
+  --working-dir outputs/graph \
+  --db-desc-folder  data/game_ideation/example_test \
+  --quantile 0.5
+```
+
 
 ## Game Code Generation
 
@@ -294,13 +384,15 @@ bash eval_batch.sh
 ## Replicability Notice
 
 In our paper, we used the game descriptions from a third party (https://bicyclecards.com/how-to-play) as inputs to: 
+- Evaluate game variant generation pipeline,
 - Evaluate game code generation pipeline, and
 - Evaluate our gameplay AIs versus prior LLM agents. 
 
 However, we are not allowed to redistribute these contents due to Fair Use policies. 
-To provide an alternative data source, the game descriptions we include in this repository are manually crafted with the assistance of ChatGPT. The game rules are manually verified to largely align with the game descriptions we used in the paper, but the difference in language may lead to some discrepancies in the generated gameplay AIs and their performance.
+To provide an alternative data source, the game descriptions we include in this repository are manually crafted with the assistance of ChatGPT. The game rules in `data\code_generation\example_lib` and `data\gameplay_ai_generation\examples` are manually verified to largely align with the game descriptions we used in the paper, but the difference in language may lead to some discrepancies in the generated gameplay AIs and their performance.
 
 To more strictly replicate our results, please manually download the game descriptions from the source. Then you replace the game description markdown files in the following directories with the downloaded files:
+- `data\game_ideation\example_test`
 - `data\code_generation\example_lib`
 - `data\gameplay_ai_generation\examples`
 
