@@ -48,7 +48,11 @@ function createCurrentPlayerAttrList(data, playerStateIndex) {
     if (data && data['public'] && data['public']['is_winner']) {
         portrait.className += ' winner-avatar';
     }
+    const indexNumber = document.createElement('div');
+    indexNumber.className = 'player-index';
+    indexNumber.textContent = "Player " + playerStateIndex;
     mainContainer.appendChild(portrait);
+    mainContainer.appendChild(indexNumber);
     mainContainer.appendChild(createPlayerCategoryBadge(playerStateIndex));
     
     // Create a main container to hold all card zones
@@ -216,7 +220,7 @@ function createPlayerProfileList(data) {
 
         // Use visual index among non-current players so placement remains stable each turn
         otherPlayers.forEach(({ playerData, index }, visualIndex) => {
-            const playerProfile = createPlayerProfile(playerData, visualIndex, otherPlayerNum, index + 1, index);
+            const playerProfile = createPlayerProfile(playerData, visualIndex, otherPlayerNum, index, index);
             mainContainer.appendChild(playerProfile);
         });
     }
