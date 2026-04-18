@@ -43,6 +43,132 @@
   <script src="static/js/bulma-carousel.min.js"></script>
   <script src="static/js/bulma-slider.min.js"></script>
   <script src="static/js/index.js"></script>
+  <style>
+    /* Concept Demo Modal */
+    .concept-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .concept-modal-overlay.is-active {
+      display: flex;
+    }
+    .concept-modal-box {
+      background: #fff;
+      border-radius: 12px;
+      width: 90vw;
+      height: 82vh;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.25);
+    }
+    .concept-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      flex-shrink: 0;
+    }
+    .concept-modal-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #0f172a;
+    }
+    .concept-modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .concept-modal-iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+    /* Concept Demo Cards */
+    .concept-demo-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      justify-content: center;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+    .concept-card {
+      width: 240px;
+      border-radius: 0;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      background: #fff;
+      box-shadow: none;
+      transition: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+    }
+    .concept-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .concept-card-thumb {
+      width: 100%;
+      height: 138px;
+      display: block;
+      background: #f1f5f9;
+    }
+    .concept-card.no-card-hover { cursor: default; }
+    .concept-card-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .concept-card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .concept-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 5px;
+      line-height: 1.35;
+    }
+    .concept-card-desc {
+      font-size: 1rem;
+      color: #4a4a4a;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      flex: 1;
+    }
+    .concept-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 6px 13px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+    .concept-card-cta svg { flex-shrink: 0; }
+    .concept-card-cta:hover {
+      filter: brightness(0.93);
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
@@ -164,20 +290,55 @@
 <section class="section">
   <div class="container is-max-desktop content">
       <h2 class="title has-text-centered">Create Game Variants</h2>
+      <div class="columns is-variable is-4" style="align-items:stretch;">
 
-      <div class="columns"> 
-        <div class="column is-one-third">
-          <img class="column" src="static/images/idea_0.png" alt="Banner"/>
-          <p>Given a library of card game descriptions, while we could just prompt LLMs to design new games (i.e. different from existing ones) by feeding all descriptions, this approach creates overload to LLM reasoning. We need to break down and digest the data first.</p>
+        <!-- Column 1: card style, no demo -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/idea_0.png" alt="Problem statement" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">The Scalability Problem</div>
+              <div class="concept-card-desc">Given a library of card game descriptions, while we could just prompt LLMs to design new games (i.e. different from existing ones) by feeding all descriptions, this approach creates overload to LLM reasoning. We need to break down and digest the data first.</div>
+            </div>
+          </div>
         </div>
-        <div class="column is-one-third">
-          <img class="column" src="static/images/idea_1.png" alt="Banner"/>
-          <p>To break down game concepts, we use LLMs to convert game description texts to <strong>game mechanic graphs</strong> that describe the dependencies between atomic game mechanics. </p>
+
+        <!-- Column 2: demo card using idea_1 image -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/idea_1.png" alt="Game mechanic graph" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Game Mechanic Graph</div>
+              <div class="concept-card-desc" style="flex:0;">To break down game concepts, we use LLMs to convert game description texts to <strong>game mechanic graphs</strong> that describe the dependencies between atomic game mechanics.</div>
+              <span class="concept-card-cta concept-demo-open" style="background:#eef2ff;color:#4338ca;margin-top:4px;" data-src="static/concepts/demo_graph_generation.html" data-title="Game Mechanic Graph Generation">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="2,1 9,5 2,9" fill="#4338ca"/></svg>
+                Launch Demo
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="column is-one-third">
-          <img class="column" src="static/images/idea_2.png" alt="Banner"/>
-          <p>For all mechanic graphs generated from the library, we cluster similar nodes and use LLMs to design <strong>new game mechanic instances</strong>. Then we can mutate any game input using new instances.</p>
+
+        <!-- Column 3: demo card using idea_2 image, two launch buttons -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/idea_2.png" alt="New mechanic instances" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Mechanic Synthesis &amp; Game Variation</div>
+              <div class="concept-card-desc">For all mechanic graphs generated from the library, we cluster similar nodes and use LLMs to design <strong>new game mechanic instances</strong>. Then we can mutate any game input using new instances.</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                <span class="concept-card-cta concept-demo-open" style="background:#f5f3ff;color:#6d28d9;" data-src="static/concepts/demo_concept_synthesis.html" data-title="Concept Synthesis">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="2,1 9,5 2,9" fill="#6d28d9"/></svg>
+                  Synthesis Demo
+                </span>
+                <span class="concept-card-cta concept-demo-open" style="background:#e0f2fe;color:#0369a1;" data-src="static/concepts/demo_game_variation.html" data-title="Game Variation">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="2,1 9,5 2,9" fill="#0369a1"/></svg>
+                  Variation Demo
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
       
   </div>
@@ -187,19 +348,40 @@
 <section class="section">
   <div class="container is-max-desktop content">
       <h2 class="title has-text-centered">Develop Game Environment</h2>
+      <div class="columns is-variable is-4" style="align-items:stretch;">
 
-      <div class="columns is-vcentered"> 
-        <div class="column is-one-third">
-          <img class="column" src="static/images/code_0.png" alt="code"/>
+        <!-- Column 1: demo card using code_0 image -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/code_0.png" alt="Code generation pipeline" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Code Generation Pipeline</div>
+              <div class="concept-card-desc">An iterative refinement loop that aligns the game environment to the game description through LLM-driven code generation and validation.</div>
+            </div>
+          </div>
         </div>
-        <div class="column">
-          <p>Cardiverse uses an iterative refinement loop to align game environment to game description:</p>
-          <ul>
-          <li>LLM drafts initial code.</li>
-          <li>Code runs in custom game engine that produce gameplay records.</li>
-          <li>LLM checks records for rule violations, then refines code. Repeat until no violations are found.</li>
-          </ul>
+
+        <!-- Column 2: plain text card -->
+        <div class="column" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">How It Works</div>
+              <div class="concept-card-desc" style="flex:0;">
+                <p>Cardiverse uses an iterative refinement loop to align game environment to game description:</p>
+                <ul>
+                  <li>LLM drafts initial code.</li>
+                  <li>Code runs in custom game engine that produce gameplay records.</li>
+                  <li>LLM checks records for rule violations, then refines code. Repeat until no violations are found.</li>
+                </ul>
+              </div>
+              <span class="concept-card-cta concept-demo-open" style="background:#f0fdf4;color:#047857;margin-top:4px;" data-src="static/concepts/demo_code_gen_pip.html" data-title="Game Code Generation Pipeline">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="2,1 9,5 2,9" fill="#047857"/></svg>
+                Launch Demo
+              </span>
+            </div>
+          </div>
         </div>
+
       </div>
       
   </div>
@@ -208,20 +390,45 @@
 <section class="section">
   <div class="container is-max-desktop content">
       <h2 class="title has-text-centered">Build Gameplay AI</h2>
+      <div class="columns is-variable is-4" style="align-items:stretch;">
 
-      <div class="columns"> 
-        <div class="column is-one-third">
-          <img class="column" src="static/images/gameai_0.png" alt="Banner"/>
-          <p>Instead of calling LLMs at each game decision, Cardiverse formulates the gameplay AI as a <strong>heuristic Python function</strong> that scores potential game actions based on game state features.</p>
+        <!-- Column 1: plain card -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/gameai_0.png" alt="Heuristic function" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Heuristic Action Scoring</div>
+              <div class="concept-card-desc">Instead of calling LLMs at each game decision, Cardiverse formulates the gameplay AI as a <strong>heuristic Python function</strong> that scores potential game actions based on game state features.</div>
+            </div>
+          </div>
         </div>
-        <div class="column is-one-third">
-          <img class="column" src="static/images/gameai_1.png" alt="Banner"/>
-          <p>To efficiently optimize the policy behind the heuristic function, we break one big heuristic function into smaller, more manageable components. Then we directly optimize the <strong>ensemble</strong> of components.</p>
+
+        <!-- Column 2: plain card -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/gameai_1.png" alt="Ensemble optimization" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Ensemble Optimization</div>
+              <div class="concept-card-desc">To efficiently optimize the policy behind the heuristic function, we break one big heuristic function into smaller, more manageable components. Then we directly optimize the <strong>ensemble</strong> of components.</div>
+            </div>
+          </div>
         </div>
-        <div class="column is-one-third">
-          <img class="column" src="static/images/gameai_2.png" alt="Banner"/>
-          <p>We adopt a step-wise-inclusion method, where we progressively add one more component to the heuristic ensemble as the final optimized policy.</p>
+
+        <!-- Column 3: demo card -->
+        <div class="column is-one-third" style="display:flex;">
+          <div class="concept-card no-card-hover" style="width:100%;height:100%;">
+            <img src="static/images/gameai_2.png" alt="Step-wise inclusion" style="width:100%;display:block;border-radius:0;"/>
+            <div class="concept-card-body">
+              <div class="concept-card-title" style="margin-bottom:6px;">Step-wise Inclusion</div>
+              <div class="concept-card-desc">We adopt a step-wise-inclusion method, where we progressively add one more component to the heuristic ensemble as the final optimized policy.</div>
+              <span class="concept-card-cta concept-demo-open" style="background:#fffbeb;color:#92400e;" data-src="static/concepts/demo_heuristic_gen.html" data-title="Game AI Heuristic Generation">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><polygon points="2,1 9,5 2,9" fill="#92400e"/></svg>
+                Launch Demo
+              </span>
+            </div>
+          </div>
         </div>
+
       </div>
       
   </div>
@@ -307,11 +514,85 @@
   </div>
 </footer>
 
+<!-- Concept Demo Modal -->
+<div id="concept-modal" class="concept-modal-overlay" role="dialog" aria-modal="true">
+  <div class="concept-modal-box">
+    <div class="concept-modal-header">
+      <span class="concept-modal-title" id="concept-modal-title"></span>
+      <div class="concept-modal-actions">
+        <button id="concept-modal-fullscreen" class="button is-small is-dark">
+          <span class="icon"><i class="fas fa-expand"></i></span>
+          <span>Full Screen</span>
+        </button>
+        <button id="concept-modal-close" class="button is-small is-light">
+          <span class="icon"><i class="fas fa-times"></i></span>
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+    <iframe id="concept-modal-iframe" class="concept-modal-iframe" src="" title="Concept Demo" allowfullscreen></iframe>
+  </div>
+</div>
+<!-- End Concept Demo Modal -->
+
 <!-- Statcounter tracking code -->
   
 <!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
 
     <!-- End of Statcounter Code -->
+
+  <script>
+    (function () {
+      var modal = document.getElementById('concept-modal');
+      var modalIframe = document.getElementById('concept-modal-iframe');
+      var modalTitle = document.getElementById('concept-modal-title');
+      var modalBox = modal ? modal.querySelector('.concept-modal-box') : null;
+      var btnFullscreen = document.getElementById('concept-modal-fullscreen');
+      var btnClose = document.getElementById('concept-modal-close');
+
+      document.querySelectorAll('.concept-demo-open').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          modalIframe.src = btn.dataset.src;
+          modalTitle.textContent = btn.dataset.title;
+          modal.classList.add('is-active');
+        });
+      });
+
+      function closeModal() {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().finally(function () {
+            modal.classList.remove('is-active');
+            modalIframe.src = '';
+          });
+        } else {
+          modal.classList.remove('is-active');
+          modalIframe.src = '';
+        }
+      }
+
+      if (btnClose) btnClose.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-active')) closeModal();
+      });
+
+      if (btnFullscreen && modalBox) {
+        btnFullscreen.addEventListener('click', function () {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            modalBox.requestFullscreen();
+          }
+        });
+        document.addEventListener('fullscreenchange', function () {
+          var isFs = document.fullscreenElement === modalBox;
+          btnFullscreen.textContent = isFs ? 'Exit Full Screen' : 'Full Screen';
+        });
+      }
+    })();
+  </script>
 
   <script>
     (function () {

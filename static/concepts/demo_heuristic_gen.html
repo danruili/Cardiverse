@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game AI Heuristic Generation — Cardiverse</title>
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #1e293b; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+    .left-panel { flex: 1 1 56%; min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; position: relative; }
+    .panel-header { background: #f8fafc; padding: 10px 18px; font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+    #graph-container { flex: 1; min-height: 0; background: #f8fafc; position: relative; overflow: hidden; }
+
+    /* Legend */
+    .legend { position: absolute; bottom: 14px; left: 14px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 13px; font-size: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .legend-title { font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: #94a3b8; margin-bottom: 2px; }
+    .legend-row { display: flex; align-items: center; gap: 7px; color: #475569; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; flex-shrink: 0; }
+
+    /* Right panel */
+    .right-panel { flex: 0 0 44%; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+    .prompt-scroll { flex: 1; overflow-y: auto; padding: 14px; background: #f8fafc; }
+    .prompt-scroll::-webkit-scrollbar { width: 5px; }
+    .prompt-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Step cards */
+    .step-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 9px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+    .step-card.active { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.1), 0 4px 16px rgba(99,102,241,0.1); }
+    .step-card.done { opacity: 0.5; }
+    .step-card-header { display: flex; align-items: center; gap: 9px; padding: 9px 13px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .step-card-header:hover { background: #f1f5f9; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .step-card.active   .step-num { background: #6366f1; color: #fff; }
+    .step-card.done     .step-num { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .step-card.pending  .step-num { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; }
+    .step-title { font-size: 12px; font-weight: 600; color: #1e293b; flex: 1; }
+    .step-card.done .step-title, .step-card.pending .step-title { color: #94a3b8; }
+    .step-body { padding: 11px 13px; display: none; }
+    .step-card.active .step-body { display: block; }
+
+    .ctx-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
+    .ctx-tag { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 700; }
+    .ctx-text { color: #64748b; font-size: 10px; }
+
+    .prompt-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; overflow: hidden; margin-bottom: 9px; }
+    .prompt-label { padding: 5px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    .label-user   { color: #2563eb; background: #eff6ff; }
+    .label-system { color: #7c3aed; background: #f5f3ff; }
+    .label-llm    { color: #059669; background: #f0fdf4; }
+    .prompt-text  { padding: 10px; font: 11px/1.7 Consolas, 'Fira Code', monospace; white-space: pre-wrap; color: #475569; background: #f8fafc; }
+    .response-block { padding: 10px; font: 11px/1.7 Consolas, 'Fira Code', monospace; white-space: pre-wrap; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; color: #065f46; margin-bottom: 9px; }
+
+    .hl-header { color: #0f172a; font-weight: 700; }
+    .hl-key    { color: #4f46e5; font-weight: 600; }
+    .hl-var    { color: #d97706; font-weight: 600; }
+    .hl-json   { color: #059669; }
+    .hl-node   { color: #dc2626; font-weight: 700; }
+    .hl-code   { color: #0369a1; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .chip  { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; border: 1px solid; }
+
+    .controls { background: #fff; border-top: 1px solid #e2e8f0; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary   { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-secondary:disabled { color: #cbd5e1; cursor: not-allowed; }
+    .progress-bar  { flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 2px; transition: width 0.35s ease; }
+    .step-counter  { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<div class="main">
+  <div class="left-panel">
+    <div class="panel-header">Game AI Heuristic Generation — Void Rush</div>
+    <div id="graph-container">
+      <div class="legend" id="legend">
+        <div class="legend-title">Node Types</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#f1f5f9;border-color:#64748b"></div>Game / Actions</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#e0f2fe;border-color:#0ea5e9"></div>Strategy</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#fef3c7;border-color:#f59e0b"></div>Metric</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#ede9fe;border-color:#6366f1"></div>Reflected Heuristic</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#dcfce7;border-color:#22c55e"></div>Score Function (code)</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#fff1f2;border-color:#ef4444;border-style:dashed"></div>Negative counterpart (−score)</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#f1f5f9;border-color:#e2e8f0"></div>Pruned (not in final agent)</div>
+      </div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="panel-header">LLM Prompts &amp; Responses</div>
+    <div class="prompt-scroll" id="prompt-scroll"></div>
+    <div class="controls">
+      <button class="btn btn-secondary" id="btn-reset">Reset</button>
+      <button class="btn btn-secondary" id="btn-prev" disabled>← Prev</button>
+      <button class="btn btn-primary"   id="btn-next">Next Step →</button>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <span class="step-counter" id="step-counter">0 / 6</span>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+// NODE STYLE HELPERS
+// ═══════════════════════════════════════════════════════
+
+const VIS = {
+  game: {
+    shape:'box', borderWidth:2, margin:8, widthConstraint:{minimum:100},
+    color:{ background:'#f1f5f9', border:'#64748b', highlight:{ background:'#e2e8f0', border:'#374151' } },
+    font:{ color:'#1e293b', size:11, bold:true },
+    shadow:{ enabled:true, color:'rgba(0,0,0,0.07)', size:8 }
+  },
+  action: {
+    shape:'box', borderWidth:1.5, margin:6, widthConstraint:{minimum:80},
+    color:{ background:'#f8fafc', border:'#94a3b8', highlight:{ background:'#f1f5f9', border:'#64748b' } },
+    font:{ color:'#475569', size:10 },
+    shadow:{ enabled:false }
+  },
+  strategy: {
+    shape:'box', borderWidth:2, margin:7, widthConstraint:{minimum:110},
+    color:{ background:'#e0f2fe', border:'#0ea5e9', highlight:{ background:'#bae6fd', border:'#0284c7' } },
+    font:{ color:'#075985', size:11 },
+    shadow:{ enabled:true, color:'rgba(14,165,233,0.2)', size:10 }
+  },
+  metric: {
+    shape:'box', borderWidth:2, margin:7, widthConstraint:{minimum:110},
+    color:{ background:'#fef3c7', border:'#f59e0b', highlight:{ background:'#fde68a', border:'#d97706' } },
+    font:{ color:'#78350f', size:11 },
+    shadow:{ enabled:true, color:'rgba(245,158,11,0.2)', size:10 }
+  },
+  heuristic: {
+    shape:'box', borderWidth:2.5, margin:8, widthConstraint:{minimum:120},
+    color:{ background:'#ede9fe', border:'#6366f1', highlight:{ background:'#ddd6fe', border:'#4338ca' } },
+    font:{ color:'#3730a3', size:11, bold:true },
+    shadow:{ enabled:true, color:'rgba(99,102,241,0.25)', size:14 }
+  },
+  code: {
+    shape:'box', borderWidth:2, margin:7, widthConstraint:{minimum:110},
+    color:{ background:'#dcfce7', border:'#22c55e', highlight:{ background:'#bbf7d0', border:'#16a34a' } },
+    font:{ color:'#14532d', size:10, face:'Consolas' },
+    shadow:{ enabled:true, color:'rgba(34,197,94,0.2)', size:10 }
+  },
+  dim: {
+    color:{ background:'#f1f5f9', border:'#e2e8f0', highlight:{ background:'#f1f5f9', border:'#cbd5e1' } },
+    font:{ color:'#cbd5e1' },
+    shadow:{ enabled:false }
+  }
+};
+
+function edgeVis(color='#cbd5e1', dashed=false) {
+  return {
+    color:{ color, highlight:color, hover:color },
+    width: 1.5,
+    dashes: dashed ? [5,4] : false,
+    arrows:{ to:{ enabled:true, scaleFactor:0.5 } },
+    smooth:{ type:'cubicBezier', roundness:0.3 }
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// GRAPH DATA
+// ═══════════════════════════════════════════════════════
+
+const nodesDS = new vis.DataSet([]);
+const edgesDS = new vis.DataSet([]);
+const container = document.getElementById('graph-container');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  width:'100%', height:'100%',
+  layout:{ hierarchical:{ enabled:false } },
+  physics:{ enabled:false },
+  interaction:{ hover:true, zoomView:true, dragView:true },
+});
+window.addEventListener('load',   () => { network.redraw(); network.fit(); });
+window.addEventListener('resize', () => { network.redraw(); network.fit(); });
+
+// ═══════════════════════════════════════════════════════
+// STEPS
+// ═══════════════════════════════════════════════════════
+
+function negVis(accentColor) {
+  return {
+    shape:'box', borderWidth:2, margin:7, widthConstraint:{minimum:110},
+    color:{ background:'#fff1f2', border:'#ef4444', highlight:{ background:'#fee2e2', border:'#b91c1c' } },
+    font:{ color:'#991b1b', size:10, face:'Consolas' },
+    shadow:{ enabled:true, color:'rgba(239,68,68,0.2)', size:10 },
+    borderDashes:[4,3]
+  };
+}
+
+const STEPS = [
+
+// ── 0 ──────────────────────────────────────────────────
+{
+  title: 'Step 0: Game Description & Extract Actions',
+  ctx: 'create_agent.py → extract_action_from_desc()',
+  addNodes: [
+    { id:'game', label:'Void Rush\n(game)', x:0, y:0, fixed:{x:true,y:true}, ...VIS.game },
+    { id:'a1', label:'play_card',  x:-240, y:130, fixed:{x:true,y:true}, ...VIS.action },
+    { id:'a2', label:'draw_card',  x: -80, y:130, fixed:{x:true,y:true}, ...VIS.action },
+    { id:'a3', label:'declare_void', x: 80, y:130, fixed:{x:true,y:true}, ...VIS.action },
+    { id:'a4', label:'skip / reverse\n/ wild',  x: 240, y:130, fixed:{x:true,y:true}, ...VIS.action },
+  ],
+  addEdges: [
+    { id:'ea1', from:'game', to:'a1', ...edgeVis('#94a3b8') },
+    { id:'ea2', from:'game', to:'a2', ...edgeVis('#94a3b8') },
+    { id:'ea3', from:'game', to:'a3', ...edgeVis('#94a3b8') },
+    { id:'ea4', from:'game', to:'a4', ...edgeVis('#94a3b8') },
+  ],
+  updateNodes: [],
+  prompt: {
+    label:'USER PROMPT', cls:'label-user',
+    text:`<span class="hl-key">extract_action_from_desc()</span>
+
+Read the game description and extract the
+complete list of legal actions an AI player
+can take.
+
+<span class="hl-header">Game Description</span>
+<span class="hl-var">Void Rush — 2–4 players
+TURN: Play a card by COLOR or NUMBER.
+If unable, draw one card.
+Action cards: Skip, Reverse, Draw 2,
+              Wild, Wild +4
+WIN: First to empty hand. Shout "Void!"</span>`,
+  },
+  response:`<span class="hl-json">Legal actions:
+  play_card(card)    — play matching card
+  draw_card()        — draw from deck
+  declare_void()     — announce "Void!"
+  play_skip(card)    — Skip action card
+  play_reverse(card) — Reverse direction
+  play_draw2(card)   — Draw 2 action card
+  play_wild(card, color)   — Wild card
+  play_wild4(card, color)  — Wild +4 card</span>`,
+  chips:[
+    { label:'8 legal actions extracted', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ]
+},
+
+// ── 1 ──────────────────────────────────────────────────
+{
+  title: 'Step 1: Design Strategies (parallel)',
+  ctx: 'policy_design.py → design_strategy() — 4 strategies',
+  addNodes: [
+    { id:'s1', label:'Hand Thinning',     x:-360, y:-170, fixed:{x:true,y:true}, ...VIS.strategy },
+    { id:'s2', label:'Color Control',     x:-120, y:-170, fixed:{x:true,y:true}, ...VIS.strategy },
+    { id:'s3', label:'Action Card Timing', x: 120, y:-170, fixed:{x:true,y:true}, ...VIS.strategy },
+    { id:'s4', label:'Void Declaration', x: 360, y:-170, fixed:{x:true,y:true}, ...VIS.strategy },
+  ],
+  addEdges: [
+    { id:'es1', from:'game', to:'s1', ...edgeVis('#0ea5e9', true) },
+    { id:'es2', from:'game', to:'s2', ...edgeVis('#0ea5e9', true) },
+    { id:'es3', from:'game', to:'s3', ...edgeVis('#0ea5e9', true) },
+    { id:'es4', from:'game', to:'s4', ...edgeVis('#0ea5e9', true) },
+  ],
+  updateNodes: [],
+  prompt: {
+    label:'USER PROMPT', cls:'label-user',
+    text:`<span class="hl-key">strategy_template</span> × 4 strategies
+
+You are a powerful assistant who designs
+an AI player for a card game.
+
+<span class="hl-header"># Task</span>
+Please think in steps to provide me
+<span class="hl-var">4</span> useful strategies to win the game.
+For each strategy, describe:
+- its definition
+- how it relates to the game state
+- what action it suggests
+
+<span class="hl-header"># Response format</span>
+<span class="hl-json">{ "items": [
+    { "name": "...",
+      "description": "...",
+      "reason": "..." }, ...
+] }</span>`,
+  },
+  response:`<span class="hl-json">[
+  {
+    "name": "Hand Thinning",
+    "description": "Prioritize playing cards
+      to minimize hand size, reducing
+      exposure to Draw 2 / Wild+4 attacks.",
+    "reason": "Smaller hands accelerate
+      toward the win condition."
+  },
+  {
+    "name": "Color Control",
+    "description": "Steer the active color
+      toward suits where you hold multiple
+      cards for chained plays.",
+    "reason": "Matching by color allows
+      consecutive turn plays."
+  },
+  {
+    "name": "Action Card Timing",
+    "description": "Hold Skip / Draw 2 cards
+      until opponents approach one card left,
+      then deploy offensively.",
+    "reason": "Disrupts imminent wins."
+  },
+  {
+    "name": "Void Declaration",
+    "description": "Declare 'Void!' precisely
+      when reaching one card — never late,
+      never early.",
+    "reason": "Failure incurs Draw 2 penalty."
+  }
+]</span>`,
+  chips:[
+    { label:'4 strategies', color:'#075985', bg:'#e0f2fe', bd:'#0ea5e9' },
+    { label:'parallel with metrics', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ]
+},
+
+// ── 2 ──────────────────────────────────────────────────
+{
+  title: 'Step 2: Design Metrics (parallel)',
+  ctx: 'policy_design.py → design_metric() — 4 metrics',
+  addNodes: [
+    { id:'m1', label:'Hand Size Ratio',   x:-360, y: 300, fixed:{x:true,y:true}, ...VIS.metric },
+    { id:'m2', label:'Color Match Count', x:-120, y: 300, fixed:{x:true,y:true}, ...VIS.metric },
+    { id:'m3', label:'Threat Level',      x: 120, y: 300, fixed:{x:true,y:true}, ...VIS.metric },
+    { id:'m4', label:'Action Card Ratio', x: 360, y: 300, fixed:{x:true,y:true}, ...VIS.metric },
+  ],
+  addEdges: [
+    { id:'em1', from:'game', to:'m1', ...edgeVis('#f59e0b', true) },
+    { id:'em2', from:'game', to:'m2', ...edgeVis('#f59e0b', true) },
+    { id:'em3', from:'game', to:'m3', ...edgeVis('#f59e0b', true) },
+    { id:'em4', from:'game', to:'m4', ...edgeVis('#f59e0b', true) },
+  ],
+  updateNodes: [],
+  prompt: {
+    label:'USER PROMPT', cls:'label-user',
+    text:`<span class="hl-key">metric_template</span> × 4 metrics
+
+<span class="hl-header"># Task</span>
+To design a good gameplay policy, we need
+game state <span class="hl-var">metrics</span> that constitute a
+reward function.
+
+Tell me what useful metric can we derive
+from the game state? Provide <span class="hl-var">4</span> metrics
+correlated with game state AND action.
+
+<span class="hl-header"># Response format</span>
+<span class="hl-json">{ "items": [
+    { "name": "...",
+      "description": "..." }, ...
+] }</span>`,
+  },
+  response:`<span class="hl-json">[
+  {
+    "name": "Hand Size Ratio",
+    "description": "my_hand_size /
+      max(opponent_hand_sizes) — lower
+      ratio is better."
+  },
+  {
+    "name": "Color Match Count",
+    "description": "Count of cards in hand
+      matching the active discard color —
+      higher means more plays available."
+  },
+  {
+    "name": "Threat Level",
+    "description": "Min opponent hand size —
+      if ≤ 2 increase urgency of action
+      cards."
+  },
+  {
+    "name": "Action Card Ratio",
+    "description": "Fraction of hand that
+      are action cards (Skip/Draw2/Wild) —
+      higher gives more control options."
+  }
+]</span>`,
+  chips:[
+    { label:'4 metrics', color:'#78350f', bg:'#fef3c7', bd:'#f59e0b' },
+    { label:'parallel with strategies', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ]
+},
+
+// ── 3 ──────────────────────────────────────────────────
+{
+  title: 'Step 3: Reflect Strategies with Metrics',
+  ctx: 'policy_design.py → reflect_strategies() — 4 reflections',
+  addNodes: [
+    { id:'h1', label:'Hand Thinning\n(reflected)',      x:-360, y: 65, fixed:{x:true,y:true}, ...VIS.heuristic },
+    { id:'h2', label:'Color Control\n(reflected)',      x:-120, y: 65, fixed:{x:true,y:true}, ...VIS.heuristic },
+    { id:'h3', label:'Action Timing\n(reflected)',      x: 120, y: 65, fixed:{x:true,y:true}, ...VIS.heuristic },
+    { id:'h4', label:'Void Declaration\n(reflected)',   x: 360, y: 65, fixed:{x:true,y:true}, ...VIS.heuristic },
+  ],
+  addEdges: [
+    { id:'ehs1', from:'s1', to:'h1', ...edgeVis('#6366f1') },
+    { id:'ehs2', from:'s2', to:'h2', ...edgeVis('#6366f1') },
+    { id:'ehs3', from:'s3', to:'h3', ...edgeVis('#6366f1') },
+    { id:'ehs4', from:'s4', to:'h4', ...edgeVis('#6366f1') },
+    { id:'ehm1', from:'m1', to:'h1', ...edgeVis('#f59e0b', true) },
+    { id:'ehm1b',from:'m1', to:'h2', ...edgeVis('#f59e0b', true) },
+    { id:'ehm2', from:'m2', to:'h2', ...edgeVis('#f59e0b', true) },
+    { id:'ehm3', from:'m3', to:'h3', ...edgeVis('#f59e0b', true) },
+    { id:'ehm3b',from:'m3', to:'h4', ...edgeVis('#f59e0b', true) },
+    { id:'ehm4', from:'m4', to:'h3', ...edgeVis('#f59e0b', true) },
+  ],
+  updateNodes: [],
+  prompt: {
+    label:'USER PROMPT', cls:'label-user',
+    text:`<span class="hl-key">reflection_template</span> × 4 strategies
+
+Given strategy:
+<span class="hl-var">"Hand Thinning — Prioritize playing cards
+ to minimize hand size..."</span>
+
+Please refine the strategy:
+<span class="hl-header">(1)</span> Clarify any vague conditions:
+     e.g. "use at critical moments" —
+     specify what those moments are.
+<span class="hl-header">(2)</span> Condition the strategy on game state
+     metrics where applicable:
+<span class="hl-json">{
+  "Hand Size Ratio":   "...",
+  "Color Match Count": "...",
+  "Threat Level":      "...",
+  "Action Card Ratio": "..."
+}</span>`,
+  },
+  response:`<span class="hl-json">{
+  "name": "Hand Thinning",
+  "reflection": "Strategy is sound but
+    vague on priority ordering.",
+  "content": "**Hand Thinning**
+  When hand_size_ratio > 1.0 (I hold
+  more cards than opponents), aggressively
+  prefer play_card over draw_card.
+  If color_match_count >= 2, chain plays
+  within the same turn if possible.
+  Deprioritize action cards for thinning;
+  preserve them for threat_level >= 2."
+}</span>`,
+  chips:[
+    { label:'strategy + metrics → heuristic', color:'#3730a3', bg:'#ede9fe', bd:'#6366f1' },
+    { label:'4 reflections', color:'#3730a3', bg:'#ede9fe', bd:'#6366f1' },
+  ]
+},
+
+// ── 4 ──────────────────────────────────────────────────
+{
+  title: 'Step 4: Code Every Policy & Fix by Self-Play',
+  ctx: 'q_func_design.py → LLMQFunc.create_code() × 12 → fix_by_playing() × 3 agents',
+  addNodes: [
+    // Code nodes at compact layout positions (final layout)
+    { id:'cs1', label:'Hand Thin\n[strategy] ✓',    x:-210, y:-380, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cs2', label:'Color Ctrl\n[strategy] ✓',   x: -70, y:-380, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cs3', label:'Action Time\n[strategy] ✓',  x:  70, y:-380, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cs4', label:'Void Decl\n[strategy] ✓',    x: 210, y:-380, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cr1', label:'Hand Thin\n[reflect] ✓',     x:-210, y:-160, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cr2', label:'Color Ctrl\n[reflect] ✓',    x: -70, y:-160, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cr3', label:'Action Time\n[reflect] ✓',   x:  70, y:-160, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cr4', label:'Void Decl\n[reflect] ✓',     x: 210, y:-160, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cm1', label:'Hand Size\n[metric] ✓',      x:-210, y:  60, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cm2', label:'Color Match\n[metric] ✓',    x: -70, y:  60, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cm3', label:'Threat Lvl\n[metric] ✓',     x:  70, y:  60, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'cm4', label:'Action Ratio\n[metric] ✓',   x: 210, y:  60, fixed:{x:true,y:true}, ...VIS.code },
+    { id:'play', label:'Self-Play\n(10 × 3)', x:0, y:-260, fixed:{x:true,y:true},
+      shape:'ellipse', borderWidth:2, margin:10,
+      color:{ background:'#fdf4ff', border:'#a855f7', highlight:{ background:'#fae8ff', border:'#7e22ce' } },
+      font:{ color:'#581c87', size:11 },
+      shadow:{ enabled:true, color:'rgba(168,85,247,0.2)', size:12 } },
+  ],
+  addEdges: [
+    { id:'eps1', from:'cs1', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'eps2', from:'cs2', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'eps3', from:'cs3', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'eps4', from:'cs4', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epr1', from:'cr1', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epr2', from:'cr2', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epr3', from:'cr3', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epr4', from:'cr4', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epm1', from:'cm1', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epm2', from:'cm2', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epm3', from:'cm3', to:'play', ...edgeVis('#a855f7', true) },
+    { id:'epm4', from:'cm4', to:'play', ...edgeVis('#a855f7', true) },
+  ],
+  updateNodes: [
+    { id:'game', hidden:true },
+    { id:'a1', hidden:true }, { id:'a2', hidden:true }, { id:'a3', hidden:true }, { id:'a4', hidden:true },
+    { id:'s1', hidden:true }, { id:'s2', hidden:true }, { id:'s3', hidden:true }, { id:'s4', hidden:true },
+    { id:'m1', hidden:true }, { id:'m2', hidden:true }, { id:'m3', hidden:true }, { id:'m4', hidden:true },
+    { id:'h1', hidden:true }, { id:'h2', hidden:true }, { id:'h3', hidden:true }, { id:'h4', hidden:true },
+  ],
+  updateEdges: [
+    { id:'ea1', hidden:true }, { id:'ea2', hidden:true }, { id:'ea3', hidden:true }, { id:'ea4', hidden:true },
+    { id:'es1', hidden:true }, { id:'es2', hidden:true }, { id:'es3', hidden:true }, { id:'es4', hidden:true },
+    { id:'em1', hidden:true }, { id:'em2', hidden:true }, { id:'em3', hidden:true }, { id:'em4', hidden:true },
+    { id:'ehs1',hidden:true }, { id:'ehs2',hidden:true }, { id:'ehs3',hidden:true }, { id:'ehs4',hidden:true },
+    { id:'ehm1',hidden:true }, { id:'ehm1b',hidden:true},{ id:'ehm2',hidden:true },
+    { id:'ehm3',hidden:true }, { id:'ehm3b',hidden:true},{ id:'ehm4',hidden:true },
+  ],
+  prompt: {
+    label:'SYSTEM PROMPT', cls:'label-system',
+    text:`<span class="hl-header">① CODE — </span><span class="hl-key">func_template</span> + <span class="hl-key">func_refine_template</span>
+
+Each policy type spawns its own agent:
+<span class="hl-json">for method in ["strategy","metric","reflect"]:
+    policy_list = policy.get_policy(method)
+    agent = HeuristicEnsembleAgent(
+        game_description,
+        input_description,
+        policy_list   # 4 items each
+    )</span>
+
+Each item → <span class="hl-var">score(state,action)→float</span>,
+then immediately self-refined:
+<span class="hl-code">def score(state, action) -> float:
+    ...
+    result_score = ...  # 0.0 – 1.0
+    return result_score</span>
+
+Refine criteria: no TODOs, no helpers,
+last line <span class="hl-code">return result_score</span>,
+only <span class="hl-code">math / numpy / random</span>.
+
+<span class="hl-header">② SELF-PLAY — </span><span class="hl-key">fix_by_playing()</span> per agent
+
+<span class="hl-json">for agent in [strategy_agent,
+              reflect_agent,
+              metric_agent]:
+    for _ in range(10):
+        env.run_with(agent)
+        # catch RuntimeErrors →
+        # invoke bug_fix_template</span>
+
+On error, <span class="hl-key">bug_fix_template</span> receives:
+  • current score() code
+  • state dict at crash point
+  • action string + full traceback
+
+Fixed code replaces old; saved as
+<span class="hl-var">policy_&lt;method&gt;_fixed.json</span>`,
+  },
+  response:`<span class="hl-json">── Coding ──────────────────────────────────
+strategy agent — 4 functions drafted & refined:
+  cs1 ✓   cs2 ✓
+  cs3 ⚠ fixed: guard for empty
+      legal_actions list
+  cs4 ✓
+reflect agent — 4 functions:  cr1 ✓  cr2 ✓  cr3 ✓  cr4 ✓
+metric agent  — 4 functions:
+  cm1 ⚠ fixed: division-by-zero
+      when all hands are empty
+  cm2 ✓  cm3 ✓  cm4 ✓
+12 / 12 refined. 2 edge cases fixed.
+
+── Self-Play ────────────────────────────────
+strategy agent — 10 games: all OK
+reflect agent  — 10 games:
+  game 4: AttributeError in cr3
+  → bug_fix invoked → patched
+  games 5-10: OK
+metric agent   — 10 games: all OK
+
+Saved:
+  policy_strategy_fixed.json  ✓
+  policy_reflect_fixed.json   ✓ (1 fix)
+  policy_metric_fixed.json    ✓</span>`,
+  chips:[
+    { label:'3 agents × 4 = 12 score()', color:'#14532d', bg:'#dcfce7', bd:'#22c55e' },
+    { label:'2 code edge cases fixed', color:'#92400e', bg:'#fffbeb', bd:'#f59e0b' },
+    { label:'1 runtime bug fixed', color:'#92400e', bg:'#fffbeb', bd:'#f59e0b' },
+  ]
+},
+
+// ── 7 ──────────────────────────────────────────────────
+// For each score function, add a negative counterpart (flipped weight).
+// The optimizer will pick from both positives and negatives.
+{
+  title: 'Step 5: Generate Negative Counterparts (flipped sign)',
+  ctx: 'optimize_agent.py → flip_weights() — 12 pos + 12 neg = 24 candidates',
+  addNodes: [
+    // strategy negatives — same x as cs1-4, one row above (y=-450)
+    // strategy negatives — below cs (cs y=-380, ncs y=-270)
+    { id:'ncs1', label:'−Hand Thin\n[strategy]',   x:-210, y:-270, fixed:{x:true,y:true}, ...negVis('#0ea5e9') },
+    { id:'ncs2', label:'−Color Ctrl\n[strategy]',  x: -70, y:-270, fixed:{x:true,y:true}, ...negVis('#0ea5e9') },
+    { id:'ncs3', label:'−Action Time\n[strategy]', x:  70, y:-270, fixed:{x:true,y:true}, ...negVis('#0ea5e9') },
+    { id:'ncs4', label:'−Void Decl\n[strategy]',   x: 210, y:-270, fixed:{x:true,y:true}, ...negVis('#0ea5e9') },
+    // reflect negatives — below cr (cr y=-160, ncr y=-50)
+    { id:'ncr1', label:'−Hand Thin\n[reflect]',    x:-210, y: -50, fixed:{x:true,y:true}, ...negVis('#6366f1') },
+    { id:'ncr2', label:'−Color Ctrl\n[reflect]',   x: -70, y: -50, fixed:{x:true,y:true}, ...negVis('#6366f1') },
+    { id:'ncr3', label:'−Action Time\n[reflect]',  x:  70, y: -50, fixed:{x:true,y:true}, ...negVis('#6366f1') },
+    { id:'ncr4', label:'−Void Decl\n[reflect]',    x: 210, y: -50, fixed:{x:true,y:true}, ...negVis('#6366f1') },
+    // metric negatives — below cm (cm y=60, ncm y=170)
+    { id:'ncm1', label:'−Hand Size\n[metric]',     x:-210, y: 170, fixed:{x:true,y:true}, ...negVis('#f59e0b') },
+    { id:'ncm2', label:'−Color Match\n[metric]',   x: -70, y: 170, fixed:{x:true,y:true}, ...negVis('#f59e0b') },
+    { id:'ncm3', label:'−Threat Lvl\n[metric]',    x:  70, y: 170, fixed:{x:true,y:true}, ...negVis('#f59e0b') },
+    { id:'ncm4', label:'−Action Ratio\n[metric]',  x: 210, y: 170, fixed:{x:true,y:true}, ...negVis('#f59e0b') },
+  ],
+  addEdges: [
+    { id:'encs1', from:'cs1', to:'ncs1', ...edgeVis('#94a3b8', true) },
+    { id:'encs2', from:'cs2', to:'ncs2', ...edgeVis('#94a3b8', true) },
+    { id:'encs3', from:'cs3', to:'ncs3', ...edgeVis('#94a3b8', true) },
+    { id:'encs4', from:'cs4', to:'ncs4', ...edgeVis('#94a3b8', true) },
+    { id:'encr1', from:'cr1', to:'ncr1', ...edgeVis('#94a3b8', true) },
+    { id:'encr2', from:'cr2', to:'ncr2', ...edgeVis('#94a3b8', true) },
+    { id:'encr3', from:'cr3', to:'ncr3', ...edgeVis('#94a3b8', true) },
+    { id:'encr4', from:'cr4', to:'ncr4', ...edgeVis('#94a3b8', true) },
+    { id:'encm1', from:'cm1', to:'ncm1', ...edgeVis('#94a3b8', true) },
+    { id:'encm2', from:'cm2', to:'ncm2', ...edgeVis('#94a3b8', true) },
+    { id:'encm3', from:'cm3', to:'ncm3', ...edgeVis('#94a3b8', true) },
+    { id:'encm4', from:'cm4', to:'ncm4', ...edgeVis('#94a3b8', true) },
+  ],
+  updateNodes: [
+    { id:'play', hidden:true },
+  ],
+  updateEdges: [
+    { id:'eps1', hidden:true }, { id:'eps2', hidden:true },
+    { id:'eps3', hidden:true }, { id:'eps4', hidden:true },
+    { id:'epr1', hidden:true }, { id:'epr2', hidden:true },
+    { id:'epr3', hidden:true }, { id:'epr4', hidden:true },
+    { id:'epm1', hidden:true }, { id:'epm2', hidden:true },
+    { id:'epm3', hidden:true }, { id:'epm4', hidden:true },
+  ],
+  prompt: {
+    label:'PROCESS', cls:'label-system',
+    text:`<span class="hl-key">flip_weights()</span> — per score function
+
+For every score function f(state, action),
+generate a negated counterpart:
+
+<span class="hl-json">neg_score(state, action):
+    return 1.0 - f(state, action)</span>
+
+This doubles the candidate pool to <span class="hl-var">24</span>.
+
+<span class="hl-header">Why negatives?</span>
+Some metrics are naturally inverted —
+e.g. "Hand Size Ratio" should be
+<span class="hl-var">minimized</span>, not maximized. Rather than
+manually labeling direction, the optimizer
+discovers it by testing both signs.
+
+<span class="hl-json">candidates = [
+    (f,  +1.0),   # original
+    (f,  -1.0),   # flipped
+    for f in all_score_functions
+]</span>`,
+  },
+  response:`<span class="hl-json">Generated 12 negative counterparts:
+
+  ncs1  −Hand Thin    [strategy]
+  ncs2  −Color Ctrl   [strategy]
+  ncs3  −Action Time  [strategy]
+  ncs4  −Void Decl    [strategy]
+
+  ncr1  −Hand Thin    [reflect]
+  ncr2  −Color Ctrl   [reflect]
+  ncr3  −Action Time  [reflect]
+  ncr4  −Void Decl    [reflect]
+
+  ncm1  −Hand Size    [metric]
+  ncm2  −Color Match  [metric]
+  ncm3  −Threat Lvl   [metric]
+  ncm4  −Action Ratio [metric]
+
+Total candidates: 24 (12 pos + 12 neg)</span>`,
+  chips:[
+    { label:'12 + 12 = 24 candidates', color:'#991b1b', bg:'#fee2e2', bd:'#ef4444' },
+    { label:'optimizer selects sign + weight', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ]
+},
+
+// ── 8 ──────────────────────────────────────────────────
+{
+  title: 'Step 6: Select Best Subset — Final Agent',
+  ctx: 'optimize_agent.py → tournament over 24 candidates → best subset + weights',
+  addNodes: [],
+  addEdges: [],
+  updateNodes: [
+    // dim all unselected positives
+    { id:'cs1', label:'Hand Thin\n[strategy]',   ...VIS.dim },
+    { id:'cs3', label:'Action Time\n[strategy]', ...VIS.dim },
+    { id:'cs4', label:'Void Decl\n[strategy]',   ...VIS.dim },
+    { id:'cr2', label:'Color Ctrl\n[reflect]',   ...VIS.dim },
+    { id:'cr4', label:'Void Decl\n[reflect]',    ...VIS.dim },
+    { id:'cm1', label:'Hand Size\n[metric]',     ...VIS.dim },
+    { id:'cm2', label:'Color Match\n[metric]',   ...VIS.dim },
+    { id:'cm4', label:'Action Ratio\n[metric]',  ...VIS.dim },
+    // dim all unselected negatives (keep ncs3 and ncm1 lit — they are selected)
+    { id:'ncs1', ...VIS.dim }, { id:'ncs2', ...VIS.dim }, { id:'ncs4', ...VIS.dim },
+    { id:'ncr1', ...VIS.dim }, { id:'ncr2', ...VIS.dim }, { id:'ncr3', ...VIS.dim }, { id:'ncr4', ...VIS.dim },
+    { id:'ncm2', ...VIS.dim }, { id:'ncm3', ...VIS.dim }, { id:'ncm4', ...VIS.dim },
+  ],
+  prompt: {
+    label:'OUTPUT', cls:'label-llm',
+    text:`<span class="hl-key">_optimize_heuristic_selection()</span>
+
+Run 400-game tournament over all 24
+candidates (12 pos + 12 neg).
+Select the highest-win-rate subset:
+
+<span class="hl-json">for subset in powerset(candidates):
+    win_rate = tournament(subset, n=400)
+    track_best()</span>
+
+At each turn:
+<span class="hl-code">score = (
+  +0.30 * cr1(s, a)   # reflect  +
+  +0.28 * cr3(s, a)   # reflect  +
+  +0.22 * cs2(s, a)   # strategy +
+  -0.12 * ncm1(s, a)  # −metric  ← neg
+  +0.08 * ncs3(s, a)  # −strategy← neg
+)
+best = argmax(softmax(scores))</span>
+
+Saved → <span class="hl-var">policy_reflect_fixed.json</span>`,
+  },
+  response:`<span class="hl-json">Tournament results (400 games):
+
+Selected (5 / 24):
+  ✓  cr1   Hand Thin    [reflect]  +0.30
+  ✓  cr3   Action Time  [reflect]  +0.28
+  ✓  cs2   Color Ctrl   [strategy] +0.22
+  ✓ ncm1  −Hand Size    [metric]   −0.12
+  ✓ ncs3  −Action Time  [strategy] +0.08
+
+  note: ncm1 used negated — hand size
+  ratio should be minimized, not maximized.
+
+Win rate: 63.5%   (vs random 25.0%)
+vs reflect-only:  57.4%
+vs no-negatives:  61.2%
+
+Negatives contribute +2.3% win rate.</span>`,
+  chips:[
+    { label:'5 / 24 candidates selected', color:'#065f46', bg:'#f0fdf4', bd:'#10b981' },
+    { label:'negatives add +2.3% win rate', color:'#991b1b', bg:'#fee2e2', bd:'#ef4444' },
+  ]
+},
+];
+
+// ═══════════════════════════════════════════════════════
+// STEP ENGINE
+// ═══════════════════════════════════════════════════════
+
+let currentStep = -1;
+
+function replayUpTo(idx) {
+  nodesDS.clear();
+  edgesDS.clear();
+  for (let i = 0; i <= idx; i++) {
+    const s = STEPS[i];
+    const newNodes = s.addNodes.filter(n => !nodesDS.get(n.id));
+    if (newNodes.length) nodesDS.add(newNodes);
+    const newEdges = s.addEdges.filter(e => !edgesDS.get(e.id));
+    if (newEdges.length) edgesDS.add(newEdges);
+    const updNodes = s.updateNodes.filter(u => nodesDS.get(u.id));
+    if (updNodes.length) nodesDS.update(updNodes);
+    if (s.updateEdges) {
+      const updEdges = s.updateEdges.filter(u => edgesDS.get(u.id));
+      if (updEdges.length) edgesDS.update(updEdges);
+    }
+  }
+}
+
+function renderCards() {
+  const scroll = document.getElementById('prompt-scroll');
+  scroll.innerHTML = '';
+  STEPS.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'step-card pending';
+    card.id = `sc-${i}`;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'step-card-header';
+    hdr.innerHTML = `<div class="step-num">${i}</div><div class="step-title">${s.title}</div>`;
+    hdr.addEventListener('click', () => jumpToStep(i));
+    card.appendChild(hdr);
+
+    const body = document.createElement('div');
+    body.className = 'step-body';
+    body.innerHTML = `<div class="ctx-row"><span class="ctx-tag">Context</span><span class="ctx-text">${s.ctx}</span></div>`;
+    if (s.prompt) {
+      body.innerHTML += `<div class="prompt-block">
+        <div class="prompt-label ${s.prompt.cls}">${s.prompt.label}</div>
+        <div class="prompt-text">${s.prompt.text}</div>
+      </div>`;
+    }
+    if (s.response) {
+      body.innerHTML += `<div class="response-block">${s.response}</div>`;
+    }
+    if (s.chips && s.chips.length) {
+      const chips = s.chips.map(c =>
+        `<span class="chip" style="background:${c.bg};border-color:${c.bd};color:${c.color}">${c.label}</span>`
+      ).join('');
+      body.innerHTML += `<div class="chips">${chips}</div>`;
+    }
+    card.appendChild(body);
+    scroll.appendChild(card);
+  });
+}
+
+function updateCards(upTo) {
+  STEPS.forEach((_, i) => {
+    const card = document.getElementById(`sc-${i}`);
+    if (i < upTo)        card.className = 'step-card done';
+    else if (i === upTo) { card.className = 'step-card active'; setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100); }
+    else                  card.className = 'step-card pending';
+  });
+}
+
+function updateProgress(step) {
+  const total = STEPS.length - 1;
+  document.getElementById('progress-fill').style.width = (step / total * 100) + '%';
+  document.getElementById('step-counter').textContent = `${step} / ${total}`;
+}
+
+function syncButtons(step) {
+  document.getElementById('btn-prev').disabled = step <= 0;
+  const btnNext = document.getElementById('btn-next');
+  if (step >= STEPS.length - 1) { btnNext.textContent = '✓ Complete'; btnNext.disabled = true; }
+  else { btnNext.textContent = 'Next Step →'; btnNext.disabled = false; }
+}
+
+function jumpToStep(idx) {
+  replayUpTo(idx);
+  currentStep = idx;
+  updateCards(idx);
+  updateProgress(idx);
+  syncButtons(idx);
+  setTimeout(() => network.fit({ animation:{ duration:500, easingFunction:'easeInOutQuad' } }), 60);
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (currentStep < STEPS.length - 1) jumpToStep(currentStep + 1);
+});
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (currentStep > 0) jumpToStep(currentStep - 1);
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  nodesDS.clear(); edgesDS.clear();
+  currentStep = -1;
+  STEPS.forEach((_, i) => { document.getElementById(`sc-${i}`).className = 'step-card pending'; });
+  updateProgress(0);
+  syncButtons(-1);
+  network.fit({ animation:{ duration:400 } });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (currentStep < STEPS.length - 1) jumpToStep(currentStep + 1); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); if (currentStep > 0) jumpToStep(currentStep - 1); }
+  if (e.key === 'r' || e.key === 'R') document.getElementById('btn-reset').click();
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+renderCards();
+jumpToStep(0);
+</script>
+</body>
+</html>

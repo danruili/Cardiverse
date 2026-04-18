@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Code Generation Pipeline - Cardiverse</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Segoe UI", "SF Pro Text", system-ui, sans-serif; background: #f1f5f9; color: #1e293b; height: 100vh; overflow: hidden; }
+    .main { display: flex; height: 100vh; min-height: 0; }
+    .left-panel, .right-panel { min-height: 0; display: flex; flex-direction: column; }
+    .left-panel { flex: 1 1 56%; min-width: 0; border-right: 1px solid #e2e8f0; background: #f8fafc; }
+    .right-panel { flex: 0 0 44%; min-width: 340px; background: #fff; }
+    .panel-header { background: #f8fafc; padding: 10px 18px; font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: .8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    #graph-container { flex: 1; min-height: 0; position: relative; overflow: hidden; background: radial-gradient(circle at top left, rgba(99,102,241,.08), transparent 34%), radial-gradient(circle at bottom right, rgba(16,185,129,.08), transparent 38%), linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); cursor: grab; }
+    #graph-container.dragging { cursor: grabbing; }
+    #pipeline-graph { width: 100%; height: 100%; display: block; user-select: none; }
+    #zoom-reset { position: absolute; top: 14px; right: 14px; z-index: 10; background: rgba(255,255,255,.92); border: 1px solid #e2e8f0; border-radius: 7px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: #475569; cursor: pointer; backdrop-filter: blur(6px); }
+    #zoom-reset:hover { background: #fff; color: #1e293b; }
+    .float-card, .legend { position: absolute; background: rgba(255,255,255,.95); border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 26px rgba(15,23,42,.08); backdrop-filter: blur(10px); z-index: 4; }
+    .legend-title { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+    .prompt-scroll::-webkit-scrollbar { width: 5px; }
+    .prompt-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .mini-chips, .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mini-chips { margin-top: 10px; }
+    .mini-chip, .chip { padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; border: 1px solid; }
+    .chip-indigo { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
+    .chip-slate { background: #f8fafc; border-color: #cbd5e1; color: #475569; }
+    .chip-teal { background: #ecfeff; border-color: #a5f3fc; color: #0f766e; }
+    .legend { left: 14px; bottom: 14px; padding: 10px 13px; font-size: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .legend-row { display: flex; align-items: center; gap: 8px; color: #475569; }
+    .legend-pill { width: 18px; height: 10px; border-radius: 999px; border: 2px solid; flex-shrink: 0; }
+    .legend-line { width: 20px; height: 2px; border-radius: 999px; flex-shrink: 0; }
+    .prompt-scroll { flex: 1; overflow-y: auto; padding: 14px; background: #f8fafc; }
+    .step-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: border-color .25s, box-shadow .25s, opacity .25s; }
+    .step-card.active { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.08), 0 8px 22px rgba(99,102,241,.12); }
+    .step-card.done { opacity: .54; }
+    .step-card-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; cursor: pointer; }
+    .step-card-header:hover { background: #f1f5f9; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .step-card.active .step-num { background: #6366f1; color: #fff; }
+    .step-card.done .step-num { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .step-card.pending .step-num { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; }
+    .step-title { font-size: 12px; font-weight: 600; color: #1e293b; flex: 1; }
+    .step-card.done .step-title, .step-card.pending .step-title { color: #94a3b8; }
+    .step-body { padding: 12px 14px; display: none; }
+    .step-card.active .step-body, .step-card.expanded .step-body { display: block; }
+    .step-note { font-size: 11px; line-height: 1.6; color: #475569; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+    .ctx-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
+    .ctx-tag { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 700; }
+    .ctx-text { color: #64748b; font-size: 10px; }
+    .prompt-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; overflow: hidden; margin-bottom: 9px; }
+    .prompt-label { padding: 5px 9px; font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    .label-user { color: #2563eb; background: #eff6ff; }
+    .label-system { color: #7c3aed; background: #f5f3ff; }
+    .label-llm { color: #059669; background: #f0fdf4; }
+    .prompt-text, .response-block { padding: 10px; font: 11px/1.7 Consolas, "Fira Code", monospace; white-space: pre-wrap; }
+    .prompt-text { color: #475569; background: #f8fafc; }
+    .response-block { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; color: #065f46; margin-bottom: 9px; }
+    .hl-header { color: #0f172a; font-weight: 700; }
+    .hl-key { color: #4f46e5; font-weight: 600; }
+    .hl-var { color: #d97706; font-weight: 600; }
+    .hl-json { color: #059669; }
+    .hl-node { color: #dc2626; font-weight: 700; }
+    .controls { background: #fff; border-top: 1px solid #e2e8f0; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+    .btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: background .15s, transform .1s; }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-secondary:disabled { color: #cbd5e1; cursor: not-allowed; }
+    .progress-bar { flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 2px; transition: width .35s ease; }
+    .step-counter { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+    .graph-node { cursor: pointer; transition: opacity .25s ease; }
+    .graph-node rect { stroke-width: 2.2; filter: drop-shadow(0 8px 14px rgba(15,23,42,.08)); transition: stroke-width .25s, filter .25s, opacity .25s; }
+    .graph-node text { pointer-events: none; transition: opacity .25s; }
+    .graph-node .node-title { font-size: 15px; font-weight: 700; fill: #0f172a; }
+    .graph-node .node-subtitle { font-size: 11px; font-weight: 600; fill: #64748b; }
+    .graph-node.pending { opacity: .42; }
+    .graph-node.done rect { stroke-width: 2.6; }
+    .graph-node.active rect { stroke-width: 4.5; filter: drop-shadow(0 14px 22px rgba(59,130,246,.22)); }
+    .kind-input rect { fill: #f8fafc; stroke: #64748b; } .kind-runtime rect { fill: #ecfeff; stroke: #0891b2; } .kind-llm rect { fill: #eef2ff; stroke: #6366f1; } .kind-exec rect { fill: #eff6ff; stroke: #3b82f6; } .kind-repair rect { fill: #fffbeb; stroke: #f59e0b; } .kind-output rect { fill: #ecfdf5; stroke: #10b981; }
+    .kind-input .node-title { fill: #334155; } .kind-runtime .node-title { fill: #155e75; } .kind-llm .node-title { fill: #3730a3; } .kind-exec .node-title { fill: #1d4ed8; } .kind-repair .node-title { fill: #92400e; } .kind-output .node-title { fill: #065f46; }
+    .graph-edge { fill: none; stroke: #cbd5e1; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: .52; transition: opacity .25s, stroke .25s; }
+    .graph-edge.pending { opacity: .2; } .graph-edge.done { opacity: .68; stroke: #94a3b8; } .graph-edge.active { opacity: 1; stroke: #0f172a; } .graph-edge.loop { stroke-dasharray: 10 8; }
+    .edge-label { font-size: 11px; font-weight: 700; fill: #94a3b8; opacity: .75; transition: fill .25s, opacity .25s; }
+    .edge-label.pending { opacity: .18; } .edge-label.done { fill: #64748b; opacity: .72; } .edge-label.active { fill: #0f172a; opacity: 1; }
+    @media (max-width: 980px) {
+      body, .main { height: auto; overflow: auto; }
+      .main { flex-direction: column; }
+      .left-panel { min-height: 56vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .right-panel { min-height: 44vh; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="left-panel">
+      <div class="panel-header">Game Code Generation - representative run of GameCode/pipeline.py</div>
+      <div id="graph-container">
+        <svg id="pipeline-graph" aria-label="Game code generation flow chart">
+          <defs>
+            <marker id="arrow-head" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L6,3 L0,6 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          <g id="viewport">
+            <g id="edges-layer"></g>
+            <g id="edge-labels-layer"></g>
+            <g id="nodes-layer"></g>
+          </g>
+        </svg>
+        <button id="zoom-reset" title="Reset zoom">Reset View</button>
+        <div class="legend">
+          <div class="legend-title">Node Types</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#f8fafc;border-color:#64748b"></span>Input / file system</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#ecfeff;border-color:#0891b2"></span>Runtime bootstrap</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#eef2ff;border-color:#6366f1"></span>LLM prompt stages</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#eff6ff;border-color:#3b82f6"></span>Execution / testing</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#fffbeb;border-color:#f59e0b"></span>Repair / validation</div>
+          <div class="legend-row"><span class="legend-pill" style="background:#ecfdf5;border-color:#10b981"></span>Final outputs</div>
+          <div class="legend-title" style="margin-top:4px;">Edge States</div>
+          <div class="legend-row"><span class="legend-line" style="background:#cbd5e1"></span>Pending</div>
+          <div class="legend-row"><span class="legend-line" style="background:#94a3b8"></span>Visited</div>
+          <div class="legend-row"><span class="legend-line" style="background:#0f172a"></span>Active path</div>
+        </div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="panel-header">Prompts and intermediate results</div>
+      <div class="prompt-scroll" id="prompt-scroll"></div>
+      <div class="controls">
+        <button class="btn btn-secondary" id="btn-reset">Reset</button>
+        <button class="btn btn-secondary" id="btn-prev" disabled>Prev</button>
+        <button class="btn btn-primary" id="btn-next">Next Step</button>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <span class="step-counter" id="step-counter">0 / 0</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const GRAPH_NODES = [
+      { id: "idea", kind: "input", title: "Raw Game Idea", subtitle: "markdown description", x: 70, y: 120, w: 138, h: 84 },
+      { id: "task", kind: "input", title: "Task Bundle", subtitle: "game_name + paths", x: 70, y: 320, w: 138, h: 84 },
+      { id: "bootstrap", kind: "runtime", title: "Bootstrap", subtitle: "LLM + snippet index", x: 240, y: 320, w: 144, h: 84 },
+      { id: "structure", kind: "llm", title: "Structurize Rules", subtitle: "markdown ruleset", x: 240, y: 120, w: 144, h: 84 },
+      { id: "retrieve", kind: "llm", title: "Retrieve Examples", subtitle: "nearest desc + code", x: 420, y: 120, w: 146, h: 84 },
+      { id: "template", kind: "input", title: "Load mini_env.py", subtitle: "engine + template", x: 420, y: 320, w: 146, h: 84 },
+      { id: "draft", kind: "llm", title: "Draft Code", subtitle: "initial LLMGame", x: 600, y: 220, w: 144, h: 84 },
+      { id: "refine", kind: "llm", title: "Self Refine", subtitle: "tighten edge cases", x: 600, y: 430, w: 144, h: 84 },
+      { id: "test", kind: "exec", title: "Repeated Test Run", subtitle: "RandomAgent rollout", x: 780, y: 220, w: 150, h: 84 },
+      { id: "debug", kind: "repair", title: "Debug From Errors", subtitle: "propose + apply edits", x: 780, y: 430, w: 150, h: 84 },
+      { id: "validate", kind: "repair", title: "Validate Logs", subtitle: "rules alignment pass", x: 970, y: 220, w: 150, h: 84 },
+      { id: "correct", kind: "repair", title: "Correct Logic", subtitle: "edit + retest loop", x: 970, y: 430, w: 150, h: 84 },
+      { id: "select", kind: "output", title: "Select Final Code", subtitle: "best candidate", x: 1150, y: 220, w: 150, h: 84 },
+      { id: "output", kind: "output", title: "Write Outputs", subtitle: "game.py + history", x: 1150, y: 430, w: 150, h: 84 }
+    ];
+
+    const GRAPH_EDGES = [
+      { id: "e1", label: "scan", x: 132, y: 267, path: "M139 204 L139 308" },
+      { id: "e2", label: "prepare", x: 225, y: 350, path: "M208 362 L228 362" },
+      { id: "e3", label: "input text", x: 170, y: 240, path: "M208 350 L224 350 L224 162 L240 162" },
+      { id: "e4", label: "LLM handler", x: 315, y: 250, path: "M312 320 L312 204" },
+      { id: "e5", label: "rules md", x: 404, y: 164, path: "M384 162 L408 162" },
+      { id: "e6", label: "examples", x: 545, y: 200, path: "M566 162 L584 162 L584 262 L600 262" },
+      { id: "e7", label: "engine + TODOs", x: 546, y: 336, path: "M566 362 L584 362 L584 304 L600 304" },
+      { id: "e8", label: "first draft", x: 672, y: 389, path: "M672 304 L672 418" },
+      { id: "e9", label: "temp code", x: 772, y: 395, path: "M744 472 L762 472 L762 304 L780 304" },
+      { id: "e10", label: "traceback", x: 856, y: 388, path: "M855 304 L855 418", loop: true },
+      { id: "e11", label: "retry", x: 795, y: 395, path: "M780 472 L756 472 L756 262 L780 262", loop: true },
+      { id: "e12", label: "play logs", x: 950, y: 262, path: "M930 262 L958 262" },
+      { id: "e13", label: "rule drift", x: 1045, y: 390, path: "M1045 304 L1045 418", loop: true },
+      { id: "e14", label: "retest", x: 896, y: 548, path: "M970 472 L944 472 L944 548 L855 548 L855 304", loop: true },
+      { id: "e15", label: "pass", x: 1132, y: 262, path: "M1120 262 L1138 262" },
+      { id: "e16", label: "persist", x: 1220, y: 388, path: "M1225 304 L1225 418" }
+    ];
+
+    const STEPS = [];
+
+    STEPS.push({
+      title: "Collect task and bootstrap repetition",
+      nodes: ["idea", "task", "bootstrap"],
+      edges: ["e1", "e2"],
+      tags: ["create_game_code.py", "tasks_for_external_data()", "create_with_repetition()"],
+      summary: "The outer script scans description files, skips games that already exist, prepares task dictionaries, builds the retriever index, and wraps create_pipeline() in a repetition loop.",
+      note: "This stage is mostly orchestration. The prompts start on the next step.",
+      blocks: [
+        { type: "system", label: "Runtime Setup", text:
+`Read each .md game description.
+Build:
+{
+  "game_name": "signal_bazaar",
+  "game_code_path": "outputs/game/signal_bazaar.py",
+  "temp_dir": "outputs/temp",
+  "configs": { ... }
+}
+
+Then inside create_with_repetition():
+- instantiate LLMHandler(llm_model)
+- build CodeSnippetRetriever index
+- retry create_pipeline() up to repetition times` },
+        { type: "response", text:
+`Representative task object
+game_description_or_file_path -> raw markdown string
+repetition                     -> 3
+retrieval.library_path         -> example library
+test_and_validate.max_edits    -> repair budget
+
+Shared runtime state
+kwargs["llm_handler"]    = LLMHandler("gpt-4o-2024-08-06")
+kwargs["code_retriever"] = CodeSnippetRetriever(...).build_index()` }
+      ],
+      chips: [
+        { label: "batch input -> task dict", className: "chip-indigo" },
+        { label: "shared snippet index", className: "chip-slate" },
+        { label: "outer repetition loop", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Structurize the game description",
+      nodes: ["structure"],
+      edges: ["e3", "e4"],
+      tags: ["GameCode/utils/structure_description.py", "structurize_description()"],
+      summary: "The raw game idea is normalized into a structured markdown ruleset before retrieval or drafting happens.",
+      blocks: [
+        { type: "user", label: "Prompt", text:
+`Design a structured ruleset for implementing a card game system.
+Include:
+1. Game State
+2. Card
+3. Deck and Initial Dealing
+4. Legal Action Space
+5. Round
+6. Other Game Mechanics & Rules
+7. Player Observation Information
+8. Payoffs
+
+Wrap the output in a markdown block.` },
+        { type: "response", text:
+`### 1. Game State
+- Common: current market lot, active bidder, stock size, turn owner
+- Player public: score, reserved lots
+- Player private: hand
+
+### 4. Legal Action Space
+- bid <value>
+- pass_bid
+- reserve <card>
+- sell_lot <lot_id>
+- play_card <card>
+- end_turn
+
+### 8. Payoffs
+- highest score wins when the stock and final turns are exhausted` }
+      ],
+      chips: [
+        { label: "raw prose -> rules markdown", className: "chip-indigo" },
+        { label: "8 required sections", className: "chip-slate" },
+        { label: "saved to temp/<game>.md", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Retrieve similar examples from the library",
+      nodes: ["retrieve"],
+      edges: ["e5"],
+      tags: ["GameCode/retrieval/retrieve.py", "get_similar_texts()", "naive_example_list()"],
+      summary: "The structured markdown becomes the retrieval query. The repo then packages matched descriptions and code as few-shot examples for drafting.",
+      blocks: [
+        { type: "system", label: "Retrieval Logic", text:
+`top_file_names = get_similar_texts(
+  struct_game_desc,
+  llm_handler,
+  index_dir=library_path/indexing
+)
+
+For the top retrieval_num files:
+- read structured descriptions (.md)
+- read matching game code (.py)
+- package up to final_example_num examples as:
+  Example i
+  Input: rules markdown
+  Output: python env` },
+        { type: "response", text:
+`Retrieved context bundle
+- nearest structured game descriptions: 3
+- paired reference environments: 3
+
+Prompt-ready example string
+**Example 1**
+Input: structured trick-taking rules
+Output: runnable LLMGame subclass
+
+**Example 2**
+Input: reserve-heavy market rules
+Output: legal action strings and turn logic` }
+      ],
+      chips: [
+        { label: "semantic nearest neighbors", className: "chip-indigo" },
+        { label: "desc + code pairs", className: "chip-slate" },
+        { label: "few-shot context", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Load mini_env.py and draft the first code pass",
+      nodes: ["template", "draft"],
+      edges: ["e6", "e7"],
+      tags: ["GameEngine/mini_env.py", "GameCode/utils/code_drafting.py", "INIT_PROMPT"],
+      summary: "The repo unwraps the engine scaffold and TODO template from mini_env.py, then asks the model to implement only the child classes and required methods.",
+      blocks: [
+        { type: "user", label: "Prompt", text:
+`You are a card game programmer tasked with implementing a card game.
+- write only the necessary child classes
+- implement only methods marked TODO
+- respond with complete runnable Python
+- do not include explanations
+
+Code Environment:
+{environment_code}
+
+Code Template:
+{python_classes}
+
+Examples for Reference:
+{examples}
+
+Game Description:
+{game_description}` },
+        { type: "response", text:
+`class LLMGame(Game):
+    def reset(self):
+        self.market_lots = ...
+        self.stock = ...
+        self.phase = "bidding"
+
+    def get_legal_actions(self, player_id):
+        actions = [...]
+        return actions
+
+    def step(self, action):
+        ...
+
+class SignalBazaarPlayer(Player):
+    ...` }
+      ],
+      chips: [
+        { label: "mini_env scaffold", className: "chip-indigo" },
+        { label: "few-shot draft", className: "chip-slate" },
+        { label: "LLMGame child classes", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Self refine the draft before execution",
+      nodes: ["refine"],
+      edges: ["e8"],
+      tags: ["GameCode/utils/code_drafting.py", "naive_refine()", "replace_print_with_pass()"],
+      summary: "After the first draft, the conversation is extended with a refinement prompt that pushes on missing methods, empty-deck handling, and public logger.info commentary.",
+      blocks: [
+        { type: "user", label: "Refine Prompt", text:
+`Refine your code output
+- complete any missing methods
+- fix potential bugs
+- check empty deck and recycling edge cases
+- avoid infinite loops when reshuffling
+- add logger.info() commentary for public information
+- do not log inside get_legal_actions()` },
+        { type: "response", text:
+`Refinement changes
+- completed market resolution helper
+- added terminal condition when stock is empty
+- inserted public-only logger.info() lines
+- wrapped final code block
+- replaced print statements with pass before test time
+
+save_new_temp_code() -> signal_bazaar_7f2d.py` }
+      ],
+      chips: [
+        { label: "refine_num loop", className: "chip-indigo" },
+        { label: "logger-friendly output", className: "chip-slate" },
+        { label: "temp candidate created", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Execute repeated random-agent tests",
+      nodes: ["test"],
+      edges: ["e9"],
+      tags: ["GameCode/debug/test_env.py", "test_with_repetition()", "RandomAgent"],
+      summary: "The generated module is imported dynamically, RandomAgent instances are attached, and the environment is run repeatedly under a timeout budget.",
+      note: "Branch shown here: the first execution cycle fails. The next cards show the repair loop and then the return to tests.",
+      blocks: [
+        { type: "system", label: "Execution Loop", text:
+`module_path = outputs.temp.signal_bazaar_7f2d
+envClass = getattr(import_module(module_path), "LLMGame")
+env = envClass({ "seed": randint(0,1000), "log_path": play_log })
+env.set_agents([RandomAgent(), RandomAgent(), ...])
+env.run()
+
+Repeat up to config.test.repetition with timeout seconds per run.` },
+        { type: "response", text:
+`Test run 1/5
+seed=731
+result: timeout
+
+bug log written
+Execution timed out. Probably an infinite loop, infinite reshuffling the deck,
+or lack of game ending condition.
+
+Last visible gameplay lines
+Player 1 reserves Red-7
+Player 2 passes
+Player 3 draws lot 4` }
+      ],
+      chips: [
+        { label: "dynamic import", className: "chip-indigo" },
+        { label: "RandomAgent smoke test", className: "chip-slate" },
+        { label: "timeout -> error log", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Debug against the traceback or timeout log",
+      nodes: ["debug"],
+      edges: ["e10", "e11"],
+      tags: ["GameCode/debug/debug_code.py", "propose_edits()", "apply_edits()"],
+      summary: "If the code crashes or stalls, the pipeline unwraps the current code, asks for edits using the error context plus examples, applies the edits, and saves a new temp module.",
+      blocks: [
+        { type: "user", label: "Repair Prompt", text:
+`Inputs to debug_code()
+- current core code
+- latest error log or timeout summary
+- structured game description
+- example codes
+- game engine code
+
+Extra notes
+- design the legal action space carefully
+- do not raise parsing errors for action strings
+- verify legalness inside get_legal_actions()
+- do not re-validate actions elsewhere` },
+        { type: "response", text:
+`Edit proposal applied
+- stop reshuffling when both stock and discard are exhausted
+- move reserve legality checks into get_legal_actions()
+- ensure turn advances after bid resolution
+
+new temp module
+signal_bazaar_8a51.py
+
+Loop back to test_with_repetition()` }
+      ],
+      chips: [
+        { label: "error-guided patching", className: "chip-indigo" },
+        { label: "apply_edits()", className: "chip-slate" },
+        { label: "fresh temp module", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Validate gameplay logs against the written rules",
+      nodes: ["validate"],
+      edges: ["e12"],
+      tags: ["GameCode/validation/validate_env.py", "VALIDATE_PROMPT", "extract_analysis_blocks()"],
+      summary: "Once execution passes, the repo truncates the latest gameplay logs and asks another LLM pass whether the observed play actually matches the structured rules.",
+      blocks: [
+        { type: "user", label: "Validation Prompt", text:
+`Evaluate step by step whether the gameplay log aligns with the game description.
+Also examine if legal action choices in each turn are correct and complete.
+
+If aligned:
+***Analysis Summary***
+\`\`\`pass\`\`\`
+
+Otherwise return:
+Summary:
+\`\`\`text
+<issue>
+\`\`\`
+Quote (optional):
+\`\`\`markdown
+<relevant rule>
+\`\`\`` },
+        { type: "response", text:
+`***Step by step evaluation***
+Turn 19 allows Player 2 to sell a lot immediately after reserving a card.
+The structured rules only allow one market action before the play phase begins.
+
+***Analysis Summary***
+Summary:
+\`\`\`text
+Legal action space is too permissive after reserve; sell_lot should not remain legal.
+\`\`\`
+
+Quote:
+\`\`\`markdown
+Players may perform exactly one market action before ending the turn.
+\`\`\`` }
+      ],
+      chips: [
+        { label: "play-log audit", className: "chip-indigo" },
+        { label: "rule alignment", className: "chip-slate" },
+        { label: "analysis blocks extracted", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Correct logic, optionally retrieve snippets, and retest",
+      nodes: ["correct", "test"],
+      edges: ["e13", "e14"],
+      tags: ["CORRECT_PROMPT", "CodeSnippetRetriever", "apply_edits()"],
+      summary: "A failed validation result becomes a new editing conversation. The repo can retrieve extra snippets from the summary text, apply edits, save a new temp module, and send it back through tests.",
+      note: "This stage is conditional. It only runs when the validation summary is not `pass`.",
+      blocks: [
+        { type: "user", label: "Correction Prompt", text:
+`Based on the analysis, correct the code to make the gameplay log align with the game description.
+
+Note:
+- if the player makes invalid moves, correct get_legal_actions()
+- do not throw an error or only log a warning
+
+Your code:
+\`\`\`python
+{code}
+\`\`\`
+
+Additional examples:
+{additional_examples}` },
+        { type: "response", text:
+`Correction edits applied
+\`\`\`python
+- remove sell_lot from the same-turn action set after reserve
+- reset market_phase once reserve resolves
+- keep action legality centralized in get_legal_actions()
+\`\`\`
+
+new temp module
+signal_bazaar_b27c.py
+
+next action
+re-enter test_with_repetition()
+re-enter validate_code() if execution passes` }
+      ],
+      chips: [
+        { label: "snippet-assisted correction", className: "chip-indigo" },
+        { label: "legal action repair", className: "chip-slate" },
+        { label: "test + validate loop", className: "chip-teal" }
+      ],
+    });
+
+    STEPS.push({
+      title: "Select the best candidate and write outputs",
+      nodes: ["select", "output"],
+      edges: ["e15", "e16"],
+      tags: ["select_final_code()", "save_analysis_history()", "clean_up_temp_files()"],
+      summary: "The pipeline chooses the best available candidate, writes the final game file, saves validation history, removes temp modules, and returns performance metrics.",
+      blocks: [
+        { type: "system", label: "Finalize", text:
+`select_final_code(...)
+- prefer the highest validation-pass candidate
+- otherwise fall back to the latest test-pass candidate
+
+save_analysis_history(...)
+clean_up_temp_files(...)
+
+performance = {
+  "game_name": game_name,
+  "edit_count": edit_count,
+  "max_score_so_far": quality_score,
+  ... llm usage ...
+}` },
+        { type: "response", text:
+`Final artifacts
+outputs/game/signal_bazaar.py
+outputs/temp/signal_bazaar_analysis_history.json
+process.log
+
+Representative metrics
+edit_count: 2
+max_score_so_far: 3
+prompt_tokens: 18,420
+completion_tokens: 6,918
+
+Result
+working runnable game environment selected and saved` }
+      ],
+      chips: [
+        { label: "best candidate selected", className: "chip-indigo" },
+        { label: "analysis history persisted", className: "chip-slate" },
+        { label: "temp files cleaned", className: "chip-teal" }
+      ],
+    });
+
+    const nodesLayer = document.getElementById("nodes-layer");
+    const edgesLayer = document.getElementById("edges-layer");
+    const edgeLabelsLayer = document.getElementById("edge-labels-layer");
+    const promptScroll = document.getElementById("prompt-scroll");
+    const progressFill = document.getElementById("progress-fill");
+    const stepCounter = document.getElementById("step-counter");
+    const btnPrev = document.getElementById("btn-prev");
+    const btnNext = document.getElementById("btn-next");
+    const btnReset = document.getElementById("btn-reset");
+    let currentStep = 0;
+
+    function escapeHtml(value) {
+      return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    function highlightText(text) {
+      let html = escapeHtml(text);
+      html = html.replace(/`([^`]+)`/g, '<span class="hl-var">`$1`</span>');
+      html = html.replace(/\b(create_game_code\.py|GameCode\/[A-Za-z0-9_./-]+|GameEngine\/[A-Za-z0-9_./-]+)\b/g, '<span class="hl-key">$1</span>');
+      html = html.replace(/\b(create_with_repetition|create_pipeline|tasks_for_external_data|structurize_description|retrieve|naive_example_list|code_drafting|naive_refine|test_with_repetition|debug_code|validate_code|select_final_code|save_analysis_history|apply_edits)\b/g, '<span class="hl-node">$1</span>');
+      html = html.replace(/\{([^}\n]+)\}/g, '{<span class="hl-json">$1</span>}');
+      html = html.replace(/^(#{1,4} .+)$/gm, '<span class="hl-header">$1</span>');
+      return html;
+    }
+
+    function renderGraph() {
+      edgesLayer.innerHTML = "";
+      edgeLabelsLayer.innerHTML = "";
+      nodesLayer.innerHTML = "";
+      GRAPH_EDGES.forEach((edge) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("id", edge.id);
+        path.setAttribute("d", edge.path);
+        path.setAttribute("class", `graph-edge ${edge.loop ? "loop" : ""}`);
+        path.setAttribute("marker-end", "url(#arrow-head)");
+        edgesLayer.appendChild(path);
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("id", `${edge.id}-label`);
+        label.setAttribute("x", edge.x);
+        label.setAttribute("y", edge.y);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("class", "edge-label");
+        label.textContent = edge.label;
+        edgeLabelsLayer.appendChild(label);
+      });
+      GRAPH_NODES.forEach((node) => {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("class", `graph-node kind-${node.kind}`);
+        group.dataset.nodeId = node.id;
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", node.x); rect.setAttribute("y", node.y);
+        rect.setAttribute("width", node.w); rect.setAttribute("height", node.h);
+        rect.setAttribute("rx", "16"); rect.setAttribute("ry", "16");
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        title.setAttribute("x", node.x + node.w / 2); title.setAttribute("y", node.y + 32);
+        title.setAttribute("text-anchor", "middle"); title.setAttribute("class", "node-title"); title.textContent = node.title;
+        const subtitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        subtitle.setAttribute("x", node.x + node.w / 2); subtitle.setAttribute("y", node.y + 56);
+        subtitle.setAttribute("text-anchor", "middle"); subtitle.setAttribute("class", "node-subtitle"); subtitle.textContent = node.subtitle;
+        group.append(rect, title, subtitle);
+        group.addEventListener("click", () => jumpToNode(node.id));
+        nodesLayer.appendChild(group);
+      });
+    }
+
+    function jumpToNode(nodeId) {
+      const idx = STEPS.findIndex((step) => step.nodes.includes(nodeId));
+      if (idx >= 0) setStep(idx);
+    }
+
+    function renderSteps() {
+      if (!STEPS.length) { promptScroll.innerHTML = ""; return; }
+      promptScroll.innerHTML = STEPS.map((step, i) => {
+        const state = i < currentStep ? "done" : i === currentStep ? "active" : "pending";
+        const note = step.note ? `<div class="step-note">${escapeHtml(step.note)}</div>` : "";
+        const tags = step.tags.map((tag) => `<span class="ctx-tag">${escapeHtml(tag)}</span>`).join("");
+        const blocks = step.blocks.map((block) => {
+          if (block.type === "response") return `<div class="response-block">${highlightText(block.text)}</div>`;
+          const labelClass = block.type === "user" ? "label-user" : block.type === "llm" ? "label-llm" : "label-system";
+          return `<div class="prompt-block"><div class="prompt-label ${labelClass}">${escapeHtml(block.label)}</div><div class="prompt-text">${highlightText(block.text)}</div></div>`;
+        }).join("");
+        const chips = step.chips.map((chip) => `<span class="chip ${chip.className}">${escapeHtml(chip.label)}</span>`).join("");
+        return `<div class="step-card ${state}" data-step="${i}"><div class="step-card-header" data-step="${i}"><div class="step-num">${i + 1}</div><div class="step-title">${escapeHtml(step.title)}</div></div><div class="step-body">${note}<div class="ctx-row">${tags}<span class="ctx-text">${escapeHtml(step.summary)}</span></div>${blocks}<div class="chips">${chips}</div></div></div>`;
+      }).join("");
+      promptScroll.querySelectorAll(".step-card-header").forEach((el) => el.addEventListener("click", () => setStep(Number(el.dataset.step))));
+    }
+
+    function applyState() {
+      if (!STEPS.length) return;
+      const visitedNodes = new Set(), visitedEdges = new Set();
+      for (let i = 0; i <= currentStep; i += 1) { STEPS[i].nodes.forEach((id) => visitedNodes.add(id)); STEPS[i].edges.forEach((id) => visitedEdges.add(id)); }
+      const activeNodes = new Set(STEPS[currentStep].nodes), activeEdges = new Set(STEPS[currentStep].edges);
+      GRAPH_NODES.forEach((node) => {
+        const el = nodesLayer.querySelector(`[data-node-id="${node.id}"]`);
+        if (!el) return;
+        el.classList.remove("pending", "done", "active");
+        el.classList.add(activeNodes.has(node.id) ? "active" : visitedNodes.has(node.id) ? "done" : "pending");
+      });
+      GRAPH_EDGES.forEach((edge) => {
+        const els = [document.getElementById(edge.id), document.getElementById(`${edge.id}-label`)];
+        els.forEach((el) => {
+          if (!el) return;
+          el.classList.remove("pending", "done", "active");
+          el.classList.add(activeEdges.has(edge.id) ? "active" : visitedEdges.has(edge.id) ? "done" : "pending");
+        });
+      });
+    }
+
+    function updateControls() {
+      if (!STEPS.length) {
+        btnPrev.disabled = true; btnNext.disabled = true; progressFill.style.width = "0%"; stepCounter.textContent = "0 / 0"; return;
+      }
+      btnPrev.disabled = currentStep === 0;
+      btnNext.disabled = currentStep === STEPS.length - 1;
+      progressFill.style.width = `${((currentStep + 1) / STEPS.length) * 100}%`;
+      stepCounter.textContent = `${currentStep + 1} / ${STEPS.length}`;
+    }
+
+    function setStep(index) {
+      if (!STEPS.length) return;
+      currentStep = Math.max(0, Math.min(index, STEPS.length - 1));
+      renderSteps(); applyState(); updateControls();
+      const active = promptScroll.querySelector(`.step-card[data-step="${currentStep}"]`);
+      if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+
+    btnPrev.addEventListener("click", () => setStep(currentStep - 1));
+    btnNext.addEventListener("click", () => setStep(currentStep + 1));
+    btnReset.addEventListener("click", () => setStep(0));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") setStep(currentStep + 1);
+      if (event.key === "ArrowLeft") setStep(currentStep - 1);
+      if (event.key.toLowerCase() === "home") setStep(0);
+    });
+
+    renderGraph();
+    if (STEPS.length) setStep(0);
+    else { renderSteps(); updateControls(); }
+
+    // ── Pan & Zoom ────────────────────────────────────────────────────────────
+    (function () {
+      const svg = document.getElementById("pipeline-graph");
+      const vp  = document.getElementById("viewport");
+      const container = document.getElementById("graph-container");
+
+      // Initial transform: fit the 1240×700 content into the container
+      const CONTENT_W = 1240, CONTENT_H = 700;
+      let tx = 0, ty = 0, scale = 1;
+
+      function fitToContainer() {
+        const cw = container.clientWidth, ch = container.clientHeight;
+        scale = Math.min(cw / CONTENT_W, ch / CONTENT_H) * 0.92;
+        tx = (cw - CONTENT_W * scale) / 2;
+        ty = (ch - CONTENT_H * scale) / 2;
+        applyTransform();
+      }
+
+      function applyTransform() {
+        vp.setAttribute("transform", `translate(${tx},${ty}) scale(${scale})`);
+      }
+
+      // Wheel → zoom centred on cursor
+      container.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const rect = svg.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const delta = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+        const newScale = Math.min(Math.max(scale * delta, 0.15), 6);
+        tx = mx - (mx - tx) * (newScale / scale);
+        ty = my - (my - ty) * (newScale / scale);
+        scale = newScale;
+        applyTransform();
+      }, { passive: false });
+
+      // Mouse drag → pan
+      let dragging = false, startX = 0, startY = 0, startTx = 0, startTy = 0;
+      container.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        dragging = true; startX = e.clientX; startY = e.clientY;
+        startTx = tx; startTy = ty;
+        container.classList.add("dragging");
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        tx = startTx + (e.clientX - startX);
+        ty = startTy + (e.clientY - startY);
+        applyTransform();
+      });
+      window.addEventListener("mouseup", () => {
+        dragging = false;
+        container.classList.remove("dragging");
+      });
+
+      // Touch drag & pinch zoom
+      let lastTouches = null;
+      container.addEventListener("touchstart", (e) => {
+        lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+      }, { passive: true });
+      container.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        const cur = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+        if (cur.length === 1 && lastTouches.length === 1) {
+          tx += cur[0].x - lastTouches[0].x;
+          ty += cur[0].y - lastTouches[0].y;
+        } else if (cur.length === 2 && lastTouches.length === 2) {
+          const prevDist = Math.hypot(lastTouches[1].x - lastTouches[0].x, lastTouches[1].y - lastTouches[0].y);
+          const curDist  = Math.hypot(cur[1].x - cur[0].x, cur[1].y - cur[0].y);
+          const pinchScale = curDist / prevDist;
+          const cx = (cur[0].x + cur[1].x) / 2 - svg.getBoundingClientRect().left;
+          const cy = (cur[0].y + cur[1].y) / 2 - svg.getBoundingClientRect().top;
+          const newScale = Math.min(Math.max(scale * pinchScale, 0.15), 6);
+          tx = cx - (cx - tx) * (newScale / scale);
+          ty = cy - (cy - ty) * (newScale / scale);
+          scale = newScale;
+        }
+        lastTouches = cur;
+        applyTransform();
+      }, { passive: false });
+      container.addEventListener("touchend", () => { lastTouches = null; }, { passive: true });
+
+      // Reset button
+      document.getElementById("zoom-reset").addEventListener("click", fitToContainer);
+
+      // Initial fit
+      fitToContainer();
+      window.addEventListener("resize", fitToContainer);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Mechanic Graph — Cardiverse</title>
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #1e293b; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    .main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+    .left-panel { flex: 1 1 56%; min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
+    .panel-header { background: #f8fafc; padding: 10px 18px; font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+    #graph-container { flex: 1; min-height: 0; background: #f8fafc; position: relative; overflow: hidden; }
+
+    .legend { position: absolute; bottom: 14px; left: 14px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 13px; font-size: 10px; display: flex; flex-direction: column; gap: 5px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .legend-title { font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: #94a3b8; margin-bottom: 2px; }
+    .legend-row { display: flex; align-items: center; gap: 7px; color: #475569; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; flex-shrink: 0; }
+
+    .right-panel { flex: 0 0 44%; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+    .prompt-scroll { flex: 1; overflow-y: auto; padding: 14px; background: #f8fafc; }
+    .prompt-scroll::-webkit-scrollbar { width: 5px; }
+    .prompt-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    .step-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 9px; margin-bottom: 10px; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+    .step-card.active { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.1), 0 4px 16px rgba(99,102,241,0.1); }
+    .step-card.done { opacity: 0.5; }
+    .step-card-header { display: flex; align-items: center; gap: 9px; padding: 9px 13px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .step-card-header:hover { background: #f1f5f9; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .step-card.active   .step-num { background: #6366f1; color: #fff; }
+    .step-card.done     .step-num { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .step-card.pending  .step-num { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; }
+    .step-title { font-size: 12px; font-weight: 600; color: #1e293b; flex: 1; }
+    .step-card.done .step-title, .step-card.pending .step-title { color: #94a3b8; }
+    .step-body { padding: 11px 13px; display: none; }
+    .step-card.active .step-body { display: block; }
+
+    .ctx-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
+    .ctx-tag { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; border-radius: 5px; padding: 2px 7px; font-size: 10px; font-weight: 700; }
+    .ctx-text { color: #64748b; font-size: 10px; }
+
+    .prompt-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; overflow: hidden; margin-bottom: 9px; }
+    .prompt-label { padding: 5px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+    .label-user   { color: #2563eb; background: #eff6ff; }
+    .label-system { color: #7c3aed; background: #f5f3ff; }
+    .label-llm    { color: #059669; background: #f0fdf4; }
+    .prompt-text  { padding: 10px; font: 11px/1.7 Consolas, 'Fira Code', monospace; white-space: pre-wrap; color: #475569; background: #f8fafc; }
+    .response-block { padding: 10px; font: 11px/1.7 Consolas, 'Fira Code', monospace; white-space: pre-wrap; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; color: #065f46; margin-bottom: 9px; }
+
+    .hl-header { color: #0f172a; font-weight: 700; }
+    .hl-key    { color: #4f46e5; font-weight: 600; }
+    .hl-var    { color: #d97706; font-weight: 600; }
+    .hl-json   { color: #059669; }
+    .hl-node   { color: #dc2626; font-weight: 700; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .chip  { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; border: 1px solid; }
+
+    .controls { background: #fff; border-top: 1px solid #e2e8f0; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .btn { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary   { background: #6366f1; color: #fff; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-secondary:disabled { color: #cbd5e1; cursor: not-allowed; }
+    .progress-bar  { flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 2px; transition: width 0.35s ease; }
+    .step-counter  { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+  </style>
+</head>
+<body>
+<div class="main">
+  <div class="left-panel">
+    <div class="panel-header">Game Mechanic Graph — BFS Extraction — Void Rush</div>
+    <div id="graph-container">
+      <div class="legend">
+        <div class="legend-title">Depth</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#f1f5f9;border-color:#6b7280"></div>Goal (root)</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#ede9fe;border-color:#6366f1"></div>Depth 0 — Win Conditions</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#e0f2fe;border-color:#0ea5e9"></div>Depth 1 — Key Mechanics</div>
+        <div class="legend-row"><div class="legend-dot" style="background:#dcfce7;border-color:#22c55e"></div>Depth 2 — Sub-Mechanics</div>
+        <div class="legend-title" style="margin-top:4px;">Edge Type</div>
+        <div class="legend-row"><div style="width:16px;height:2px;background:#22c55e;border-radius:1px;flex-shrink:0"></div>Contribute</div>
+        <div class="legend-row"><div style="width:16px;height:2px;background:#f59e0b;border-radius:1px;flex-shrink:0"></div>Mixed</div>
+        <div class="legend-row"><div style="width:16px;height:2px;background:#ef4444;border-radius:1px;flex-shrink:0"></div>Hinder</div>
+      </div>
+    </div>
+  </div>
+  <div class="right-panel">
+    <div class="panel-header">LLM Prompts &amp; Responses</div>
+    <div class="prompt-scroll" id="prompt-scroll"></div>
+    <div class="controls">
+      <button class="btn btn-secondary" id="btn-reset">Reset</button>
+      <button class="btn btn-secondary" id="btn-prev" disabled>← Prev</button>
+      <button class="btn btn-primary"   id="btn-next">Next Step →</button>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <span class="step-counter" id="step-counter">0 / 8</span>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+// NODE / EDGE STYLE HELPERS
+// ═══════════════════════════════════════════════════════
+
+function depthVis(depth) {
+  const styles = {
+    goal: { color:{ background:'#f1f5f9', border:'#6b7280', highlight:{ background:'#e2e8f0', border:'#374151' } }, font:{ color:'#374151', size:12, bold:true } },
+    0:    { color:{ background:'#ede9fe', border:'#6366f1', highlight:{ background:'#ddd6fe', border:'#4338ca' } }, font:{ color:'#3730a3', size:11 } },
+    1:    { color:{ background:'#e0f2fe', border:'#0ea5e9', highlight:{ background:'#bae6fd', border:'#0284c7' } }, font:{ color:'#075985', size:11 } },
+    2:    { color:{ background:'#dcfce7', border:'#22c55e', highlight:{ background:'#bbf7d0', border:'#16a34a' } }, font:{ color:'#166534', size:11 } },
+  };
+  return { shape:'box', borderWidth:2, margin:7, widthConstraint:{minimum:90},
+           shadow:{enabled:true, color:'rgba(0,0,0,0.08)', size:8}, ...styles[depth] };
+}
+
+function edgeVis(type) {
+  const colors = { contribute:'#22c55e', mixed:'#f59e0b', hinder:'#ef4444' };
+  const c = colors[type] || '#94a3b8';
+  return { color:{ color:c, highlight:c, hover:c }, width:2, arrows:{ to:{ enabled:true, scaleFactor:0.6 } }, smooth:{ type:'cubicBezier' } };
+}
+
+// ═══════════════════════════════════════════════════════
+// STEPS
+// ═══════════════════════════════════════════════════════
+
+const STEPS = [
+// ── 0 ──────────────────────────────────────────────────
+{
+  title: 'Step 0: Initialize — Goal Node',
+  ctx: 'chain_extraction_init — extract win conditions',
+  nodesAdded: [
+    { id:'goal', label:'Win the Game\n(Goal)', x:0, y:0, fixed:{x:true,y:true}, ...depthVis('goal') },
+  ],
+  edgesAdded: [],
+  frontier: ['goal'],
+  highlightGroups: [],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_init</span>
+
+Read the following game description and answer:
+<span class="hl-key">How to win this card game?</span>
+Please respond with all <span class="hl-var">direct mechanics</span>
+that contribute or hinder this.
+
+<span class="hl-header">Game Description</span>
+<span class="hl-json">Void Rush — 2–4 players.
+Setup: each player draws 7 cards.
+TURN: Play a card matching the top
+discard by COLOR or NUMBER.
+If unable, draw one card.
+WIN: First to empty their hand wins.
+Shout "Void!" with 1 card left.</span>`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Empty Hand",
+    "type": "Contribute",
+    "description": "Discard all cards from
+      your hand to win the round.",
+    "reasoning": "Directly satisfies the
+      win condition."
+  },
+  {
+    "name": "Block Opponent",
+    "type": "Contribute",
+    "description": "Use action cards to
+      slow other players down.",
+    "reasoning": "Delays opponents from
+      emptying their hand."
+  }
+]</span>`,
+  chips: [{ label:'Goal node created', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' }],
+},
+
+// ── 1 ──────────────────────────────────────────────────
+{
+  title: 'Step 1: Depth 0 — Win Conditions',
+  ctx: 'chain_extraction_init → Empty Hand, Block Opponent',
+  nodesAdded: [
+    { id:'n_eh', label:'Empty Hand',     x:-180, y:160, fixed:{x:true,y:true}, ...depthVis(0) },
+    { id:'n_bo', label:'Block Opponent', x: 180, y:160, fixed:{x:true,y:true}, ...depthVis(0) },
+  ],
+  edgesAdded: [
+    { id:'e_eh', from:'goal', to:'n_eh', ...edgeVis('contribute') },
+    { id:'e_bo', from:'goal', to:'n_bo', ...edgeVis('contribute') },
+  ],
+  frontier: ['n_eh', 'n_bo'],
+  highlightGroups: [],
+  prompt: {
+    label: 'SYSTEM PROMPT', cls: 'label-system',
+    text:`<span class="hl-header">chain_extraction_init_check</span>
+
+Check and refine your results:
+(1) Are there mechanics NOT directly
+    related to the goal?
+
+Respond with complete results in the
+same format.`,
+  },
+  response: `<span class="hl-json">Confirmed 2 depth-0 mechanics:
+• Empty Hand     [Contribute]
+• Block Opponent [Contribute]
+
+Both directly address the win
+condition — no pruning needed.</span>`,
+  chips: [
+    { label:'Empty Hand', color:'#3730a3', bg:'#ede9fe', bd:'#6366f1' },
+    { label:'Block Opponent', color:'#3730a3', bg:'#ede9fe', bd:'#6366f1' },
+  ],
+},
+
+// ── 2 ──────────────────────────────────────────────────
+{
+  title: 'Step 2: Expand "Empty Hand"',
+  ctx: 'chain_extraction_subsequent — depth 1 from Empty Hand',
+  nodesAdded: [
+    { id:'n_pac', label:'Play a Card',    x:-340, y:340, fixed:{x:true,y:true}, ...depthVis(1) },
+    { id:'n_fd',  label:'Force Draw',     x:-160, y:340, fixed:{x:true,y:true}, ...depthVis(1) },
+  ],
+  edgesAdded: [
+    { id:'e_pac', from:'n_eh', to:'n_pac', ...edgeVis('contribute') },
+    { id:'e_fd',  from:'n_eh', to:'n_fd',  ...edgeVis('hinder') },
+  ],
+  frontier: ['n_pac', 'n_fd'],
+  highlightGroups: [['n_eh']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+What mechanics <span class="hl-key">directly trigger or stop</span>:
+<span class="hl-node">"Empty Hand"</span>?
+
+Previously extracted mechanics:
+<span class="hl-json">["Empty Hand", "Block Opponent"]</span>
+
+Extract ALL direct mechanics.
+Pay special attention to unique ones.`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Play a Card",
+    "type": "Contribute",
+    "description": "Play a matching card
+      to reduce hand size by one."
+  },
+  {
+    "name": "Force Draw",
+    "type": "Hinder",
+    "description": "Action cards force
+      opponents to draw, growing hand."
+  }
+]</span>`,
+  chips: [
+    { label:'Play a Card → Contribute', color:'#075985', bg:'#e0f2fe', bd:'#0ea5e9' },
+    { label:'Force Draw → Hinder',      color:'#991b1b', bg:'#fee2e2', bd:'#ef4444' },
+  ],
+},
+
+// ── 3 ──────────────────────────────────────────────────
+{
+  title: 'Step 3: Expand "Block Opponent"',
+  ctx: 'chain_extraction_subsequent — depth 1 from Block Opponent',
+  nodesAdded: [
+    { id:'n_st',  label:'Skip Turn',      x: 100, y:340, fixed:{x:true,y:true}, ...depthVis(1) },
+    { id:'n_uac', label:'Use Action Card', x: 280, y:340, fixed:{x:true,y:true}, ...depthVis(1) },
+  ],
+  edgesAdded: [
+    { id:'e_st',  from:'n_bo', to:'n_st',  ...edgeVis('contribute') },
+    { id:'e_uac', from:'n_bo', to:'n_uac', ...edgeVis('contribute') },
+  ],
+  frontier: ['n_st', 'n_uac'],
+  highlightGroups: [['n_bo']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+What mechanics <span class="hl-key">directly trigger or stop</span>:
+<span class="hl-node">"Block Opponent"</span>?
+
+Previously extracted mechanics:
+<span class="hl-json">["Empty Hand", "Block Opponent",
+ "Play a Card", "Force Draw"]</span>`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Skip Turn",
+    "type": "Contribute",
+    "description": "The Skip card causes
+      the next player to lose their turn."
+  },
+  {
+    "name": "Use Action Card",
+    "type": "Contribute",
+    "description": "Playing Reverse, Skip,
+      Draw2, or Wild cards disrupts
+      opponent play order or hand size."
+  }
+]</span>`,
+  chips: [
+    { label:'Skip Turn',       color:'#075985', bg:'#e0f2fe', bd:'#0ea5e9' },
+    { label:'Use Action Card', color:'#075985', bg:'#e0f2fe', bd:'#0ea5e9' },
+  ],
+},
+
+// ── 4 ──────────────────────────────────────────────────
+{
+  title: 'Step 4: Expand "Play a Card"',
+  ctx: 'chain_extraction_subsequent — depth 2 from Play a Card',
+  nodesAdded: [
+    { id:'n_mc', label:'Match Color',  x:-460, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+    { id:'n_mn', label:'Match Number', x:-300, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+    { id:'n_wc', label:'Wild Card',    x:-140, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+  ],
+  edgesAdded: [
+    { id:'e_mc', from:'n_pac', to:'n_mc', ...edgeVis('contribute') },
+    { id:'e_mn', from:'n_pac', to:'n_mn', ...edgeVis('contribute') },
+    { id:'e_wc', from:'n_pac', to:'n_wc', ...edgeVis('contribute') },
+  ],
+  frontier: ['n_mc', 'n_mn', 'n_wc'],
+  highlightGroups: [['n_pac']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+What mechanics <span class="hl-key">directly trigger or stop</span>:
+<span class="hl-node">"Play a Card"</span>?
+
+Previously extracted mechanics:
+<span class="hl-json">["Empty Hand", "Block Opponent",
+ "Play a Card", "Force Draw",
+ "Skip Turn", "Use Action Card"]</span>`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Match Color",
+    "type": "Contribute",
+    "description": "A card can be played
+      if its color matches the top
+      discard pile card."
+  },
+  {
+    "name": "Match Number",
+    "type": "Contribute",
+    "description": "A card can be played
+      if its number matches the top
+      discard pile card."
+  },
+  {
+    "name": "Wild Card",
+    "type": "Contribute",
+    "description": "Wild cards can be
+      played on any card, declaring
+      the new active color."
+  }
+]</span>`,
+  chips: [
+    { label:'Match Color',  color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+    { label:'Match Number', color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+    { label:'Wild Card',    color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+  ],
+},
+
+// ── 5 ──────────────────────────────────────────────────
+{
+  title: 'Step 5: Expand "Force Draw"',
+  ctx: 'chain_extraction_subsequent — depth 2 from Force Draw',
+  nodesAdded: [
+    { id:'n_d2', label:'Draw 2 Card', x: 20, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+    { id:'n_w4', label:'Wild +4',     x:180, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+  ],
+  edgesAdded: [
+    { id:'e_d2', from:'n_fd', to:'n_d2', ...edgeVis('contribute') },
+    { id:'e_w4', from:'n_fd', to:'n_w4', ...edgeVis('contribute') },
+  ],
+  frontier: ['n_d2', 'n_w4'],
+  highlightGroups: [['n_fd']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+What mechanics <span class="hl-key">directly trigger or stop</span>:
+<span class="hl-node">"Force Draw"</span>?
+
+Previously extracted mechanics:
+<span class="hl-json">["Empty Hand", "Block Opponent",
+ "Play a Card", "Force Draw",
+ "Skip Turn", "Use Action Card",
+ "Match Color", "Match Number",
+ "Wild Card"]</span>`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Draw 2 Card",
+    "type": "Contribute",
+    "description": "Forces the next player
+      to draw 2 cards and skip their turn."
+  },
+  {
+    "name": "Wild +4",
+    "type": "Contribute",
+    "description": "Forces the next player
+      to draw 4 cards; also changes the
+      active color."
+  }
+]</span>`,
+  chips: [
+    { label:'Draw 2 Card', color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+    { label:'Wild +4',     color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+  ],
+},
+
+// ── 6 ──────────────────────────────────────────────────
+{
+  title: 'Step 6: Expand "Use Action Card"',
+  ctx: 'chain_extraction_subsequent — depth 2 from Use Action Card',
+  nodesAdded: [
+    { id:'n_rv', label:'Reverse',  x:340, y:520, fixed:{x:true,y:true}, ...depthVis(2) },
+  ],
+  edgesAdded: [
+    { id:'e_rv',  from:'n_uac', to:'n_rv',  ...edgeVis('contribute') },
+    { id:'e_uac_d2', from:'n_uac', to:'n_d2', ...edgeVis('contribute') },
+    { id:'e_uac_st', from:'n_uac', to:'n_st', ...edgeVis('contribute') },
+  ],
+  frontier: ['n_rv'],
+  highlightGroups: [['n_uac']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+What mechanics <span class="hl-key">directly trigger or stop</span>:
+<span class="hl-node">"Use Action Card"</span>?
+
+Previously extracted:
+<span class="hl-json">["Empty Hand", "Block Opponent",
+ "Play a Card", "Force Draw",
+ "Skip Turn", "Use Action Card",
+ "Match Color", "Match Number",
+ "Wild Card", "Draw 2 Card",
+ "Wild +4"]</span>`,
+  },
+  response: `<span class="hl-json">[
+  {
+    "name": "Reverse",
+    "type": "Contribute",
+    "description": "Reverses the direction
+      of play, disrupting turn order."
+  },
+  {
+    "name": "Skip Turn",
+    "type": "Contribute",
+    "description": "(already extracted)"
+  },
+  {
+    "name": "Draw 2 Card",
+    "type": "Contribute",
+    "description": "(already extracted)"
+  }
+]</span>`,
+  chips: [
+    { label:'Reverse (new)', color:'#166534', bg:'#dcfce7', bd:'#22c55e' },
+    { label:'Skip Turn / Draw 2 (reused)', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ],
+},
+
+// ── 7 ──────────────────────────────────────────────────
+{
+  title: 'Step 7: Leaf Nodes — BFS Terminates',
+  ctx: 'chain_extraction_subsequent → [] for leaf nodes',
+  nodesAdded: [],
+  edgesAdded: [],
+  frontier: [],
+  highlightGroups: [['n_mc','n_mn','n_wc','n_d2','n_w4','n_rv','n_st']],
+  prompt: {
+    label: 'USER PROMPT', cls: 'label-user',
+    text:`<span class="hl-header">chain_extraction_subsequent</span>
+
+Expanding remaining depth-2 nodes:
+<span class="hl-node">Match Color, Match Number, Wild Card,
+Draw 2 Card, Wild +4, Reverse,
+Skip Turn</span>
+
+Are there further mechanics to extract?`,
+  },
+  response: `<span class="hl-json">[]   ← BFS terminates at depth 2
+
+All leaf nodes represent basic card
+properties or atomic game actions.
+No further mechanics to extract.</span>`,
+  chips: [
+    { label:'BFS complete', color:'#065f46', bg:'#f0fdf4', bd:'#10b981' },
+    { label:'13 nodes total', color:'#374151', bg:'#f1f5f9', bd:'#9ca3af' },
+  ],
+},
+
+// ── 8 ──────────────────────────────────────────────────
+{
+  title: 'Step 8: Final Graph — Void Rush Mechanics',
+  ctx: 'Full mechanic graph extracted and ready for downstream use',
+  nodesAdded: [],
+  edgesAdded: [],
+  frontier: [],
+  highlightGroups: [],
+  prompt: {
+    label: 'OUTPUT', cls: 'label-llm',
+    text:`<span class="hl-header">Graph extraction complete</span>
+
+<span class="hl-json">extract_entity_graph() result:
+  nodes : 13
+  edges : 15
+  depth : 0 → 2
+  root  : "Win the Game"</span>
+
+<span class="hl-header">Structure summary</span>
+<span class="hl-var">Depth 0</span>  Win Conditions
+  Empty Hand · Block Opponent
+
+<span class="hl-var">Depth 1</span>  Key Mechanics
+  Play a Card · Force Draw
+  Skip Turn   · Use Action Card
+
+<span class="hl-var">Depth 2</span>  Sub-Mechanics
+  Match Color  · Match Number
+  Wild Card    · Draw 2 Card
+  Wild +4      · Reverse`,
+  },
+  response: null,
+  chips: [
+    { label:'Graph stored to DB', color:'#065f46', bg:'#f0fdf4', bd:'#10b981' },
+    { label:'Ready for concept grouping', color:'#4c1d95', bg:'#ede9fe', bd:'#7c3aed' },
+  ],
+},
+];
+
+// ═══════════════════════════════════════════════════════
+// vis.js SETUP
+// ═══════════════════════════════════════════════════════
+
+const nodesDS = new vis.DataSet([]);
+const edgesDS = new vis.DataSet([]);
+const container = document.getElementById('graph-container');
+
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  width: '100%', height: '100%',
+  layout: { hierarchical: { enabled: false } },
+  physics: { enabled: false },
+  interaction: { hover: true, tooltipDelay: 200, zoomView: true, dragView: true },
+});
+
+window.addEventListener('load',   () => { network.redraw(); network.fit(); });
+window.addEventListener('resize', () => { network.redraw(); network.fit(); });
+
+// ═══════════════════════════════════════════════════════
+// STEP ENGINE
+// ═══════════════════════════════════════════════════════
+
+let currentStep = -1;
+
+function replayUpTo(idx) {
+  nodesDS.clear();
+  edgesDS.clear();
+
+  for (let i = 0; i <= idx; i++) {
+    const s = STEPS[i];
+    s.nodesAdded.forEach(n => { if (!nodesDS.get(n.id)) nodesDS.add(n); });
+    s.edgesAdded.forEach(e => { if (!edgesDS.get(e.id)) edgesDS.add(e); });
+  }
+
+  // Apply highlight for current step
+  const step = STEPS[idx];
+  if (step.highlightGroups && step.highlightGroups.length > 0) {
+    const highlighted = new Set(step.highlightGroups.flat());
+    nodesDS.getIds().forEach(id => {
+      const n = nodesDS.get(id);
+      if (highlighted.has(id)) {
+        nodesDS.update({ id, borderWidth: 4, shadow: { enabled: true, color: '#6366f166', size: 20 } });
+      }
+    });
+  }
+}
+
+function renderCards() {
+  const scroll = document.getElementById('prompt-scroll');
+  scroll.innerHTML = '';
+  STEPS.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'step-card pending';
+    card.id = `sc-${i}`;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'step-card-header';
+    hdr.innerHTML = `<div class="step-num">${i}</div><div class="step-title">${s.title}</div>`;
+    hdr.addEventListener('click', () => jumpToStep(i));
+    card.appendChild(hdr);
+
+    const body = document.createElement('div');
+    body.className = 'step-body';
+    body.innerHTML = `<div class="ctx-row"><span class="ctx-tag">Context</span><span class="ctx-text">${s.ctx}</span></div>`;
+
+    if (s.prompt) {
+      body.innerHTML += `<div class="prompt-block">
+        <div class="prompt-label ${s.prompt.cls}">${s.prompt.label}</div>
+        <div class="prompt-text">${s.prompt.text}</div>
+      </div>`;
+    }
+    if (s.response) {
+      body.innerHTML += `<div class="response-block">${s.response}</div>`;
+    }
+    if (s.chips && s.chips.length) {
+      const chips = s.chips.map(c =>
+        `<span class="chip" style="background:${c.bg};border-color:${c.bd};color:${c.color}">${c.label}</span>`
+      ).join('');
+      body.innerHTML += `<div class="chips">${chips}</div>`;
+    }
+
+    card.appendChild(body);
+    scroll.appendChild(card);
+  });
+}
+
+function updateCards(upTo) {
+  STEPS.forEach((_, i) => {
+    const card = document.getElementById(`sc-${i}`);
+    if (i < upTo)        card.className = 'step-card done';
+    else if (i === upTo) { card.className = 'step-card active'; setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100); }
+    else                  card.className = 'step-card pending';
+  });
+}
+
+function updateProgress(step) {
+  const total = STEPS.length - 1;
+  document.getElementById('progress-fill').style.width = (step / total * 100) + '%';
+  document.getElementById('step-counter').textContent = `${step} / ${total}`;
+}
+
+function syncButtons(step) {
+  document.getElementById('btn-prev').disabled = step <= 0;
+  const btnNext = document.getElementById('btn-next');
+  if (step >= STEPS.length - 1) { btnNext.textContent = '✓ Complete'; btnNext.disabled = true; }
+  else { btnNext.textContent = 'Next Step →'; btnNext.disabled = false; }
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+function jumpToStep(idx) {
+  replayUpTo(idx);
+  currentStep = idx;
+  updateCards(idx);
+  updateProgress(idx);
+  syncButtons(idx);
+  setTimeout(() => network.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } }), 60);
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (currentStep < STEPS.length - 1) jumpToStep(currentStep + 1);
+});
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (currentStep > 0) jumpToStep(currentStep - 1);
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  nodesDS.clear(); edgesDS.clear();
+  currentStep = -1;
+  STEPS.forEach((_, i) => { document.getElementById(`sc-${i}`).className = 'step-card pending'; });
+  updateProgress(0);
+  syncButtons(-1);
+  network.fit({ animation: { duration: 400 } });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (currentStep < STEPS.length - 1) jumpToStep(currentStep + 1); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); if (currentStep > 0) jumpToStep(currentStep - 1); }
+  if (e.key === 'r' || e.key === 'R') document.getElementById('btn-reset').click();
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+renderCards();
+jumpToStep(0);
+</script>
+</body>
+</html>
