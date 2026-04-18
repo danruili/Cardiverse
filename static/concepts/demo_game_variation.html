@@ -139,6 +139,14 @@
     .legend-row { display: flex; align-items: center; gap: 7px; color: #475569; }
     .legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 2px solid; }
     .legend-line { width: 16px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+    @media (max-width: 768px) {
+      .main { flex-direction: column; }
+      .left-panel { flex: 0 0 42%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .right-panel { flex: 1; width: 100%; min-height: 0; }
+      #text-view { padding: 16px 14px; }
+      .doc-card { padding: 18px 16px; }
+      .doc-title { font-size: 16px; }
+    }
   </style>
 </head>
 <body>

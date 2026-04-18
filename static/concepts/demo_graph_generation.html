@@ -70,6 +70,12 @@
     .progress-bar  { flex: 1; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #10b981); border-radius: 2px; transition: width 0.35s ease; }
     .step-counter  { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+    @media (max-width: 768px) {
+      .main { flex-direction: column; }
+      .left-panel { flex: 0 0 42%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .right-panel { flex: 1; width: 100%; min-height: 0; }
+      .legend { font-size: 9px; padding: 7px 10px; gap: 4px; }
+    }
   </style>
 </head>
 <body>

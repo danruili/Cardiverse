@@ -88,11 +88,12 @@
     .graph-edge.pending { opacity: .2; } .graph-edge.done { opacity: .68; stroke: #94a3b8; } .graph-edge.active { opacity: 1; stroke: #0f172a; } .graph-edge.loop { stroke-dasharray: 10 8; }
     .edge-label { font-size: 11px; font-weight: 700; fill: #94a3b8; opacity: .75; transition: fill .25s, opacity .25s; }
     .edge-label.pending { opacity: .18; } .edge-label.done { fill: #64748b; opacity: .72; } .edge-label.active { fill: #0f172a; opacity: 1; }
-    @media (max-width: 980px) {
-      body, .main { height: auto; overflow: auto; }
+    @media (max-width: 768px) {
       .main { flex-direction: column; }
-      .left-panel { min-height: 56vh; border-right: none; border-bottom: 1px solid #e2e8f0; }
-      .right-panel { min-height: 44vh; width: 100%; }
+      .left-panel { flex: 0 0 42%; border-right: none; border-bottom: 1px solid #e2e8f0; }
+      .right-panel { flex: 1; width: 100%; min-height: 0; }
+      #zoom-reset { font-size: 10px; padding: 4px 8px; }
+      .legend { display: none; }
     }
   </style>
 </head>
